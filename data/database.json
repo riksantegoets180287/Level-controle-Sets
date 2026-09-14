@@ -10,13 +10,13 @@
   "card_sets": [
     {
       "id": "level1-summa-set-id",
-      "title": "Eindspel Level 1",
+      "title": "Terugblik Level 1",
       "description": "Digitale Vaardigheden: programma's, accounts en beveiliging van het Summa College.",
       "instructions": "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
       "slug": "eindspel-level-1",
       "is_active": true,
       "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:35:01.060Z"
+      "updated_at": "2026-09-14T13:07:07.566Z"
     },
     {
       "id": "2ce9b90b-e91b-47b1-a334-b5ba3173cc7b",
@@ -30,124 +30,16 @@
     },
     {
       "id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "title": "Eindspel level 3",
-      "description": "",
+      "title": "Eindspel Level 3",
+      "description": "Canva, internetbrowser en toetsenbord: ontwerpen, websites en typen.",
       "instructions": "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
-      "slug": "veiligheid-online-kopie",
+      "slug": "eindspel-level-3",
       "is_active": true,
       "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:37.590Z"
+      "updated_at": "2026-09-14T13:10:00.000Z"
     }
   ],
   "card_pairs": [
-    {
-      "id": "pair-l1-01",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Is het programma waar je (huis)werk kunt vinden en inleveren",
-      "card_b_text": "Canvas",
-      "sort_order": 1,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-02",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Is een plaatje van jouw gezicht",
-      "card_b_text": "Avatar",
-      "sort_order": 2,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-03",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Is het programma waarmee je plaatjes of posters maakt",
-      "card_b_text": "Canva",
-      "sort_order": 3,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-04",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Dit doe je op wachtwoord.summacollege.nl",
-      "card_b_text": "Wachtwoord aanpassen",
-      "sort_order": 4,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-05",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Hieraan kun je OneDrive herkennen",
-      "card_b_text": "Blauw Wolkje",
-      "sort_order": 5,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-06",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Is een keuzedeel waar je examen in kunt doen",
-      "card_b_text": "Digitale Vaardigheden",
-      "sort_order": 6,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-07",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Hier sla je jouw gemaakte werk op (opslaan)",
-      "card_b_text": "OneDrive",
-      "sort_order": 7,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-08",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Is als je een opdracht niet goed genoeg hebt gemaakt",
-      "card_b_text": "Onvoldoende",
-      "sort_order": 8,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-09",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Dit doe je met de WAVE ID app",
-      "card_b_text": "MFA",
-      "sort_order": 9,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-10",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Hiermee kun je een screenshot maken",
-      "card_b_text": "Knipprogramma",
-      "sort_order": 10,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-11",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Is een extra beveiliging van het Summa",
-      "card_b_text": "Printen",
-      "sort_order": 11,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
-    {
-      "id": "pair-l1-12",
-      "set_id": "level1-summa-set-id",
-      "card_a_text": "Is een app waar je jouw rooster kunt kijken",
-      "card_b_text": "Eduarte",
-      "sort_order": 12,
-      "created_at": "2026-09-14T12:00:00.000Z",
-      "updated_at": "2026-09-14T12:00:00.000Z"
-    },
     {
       "id": "39ef1af0-0dad-4ad7-80c2-15c0d052a4ad",
       "set_id": "2ce9b90b-e91b-47b1-a334-b5ba3173cc7b",
@@ -214,65 +106,200 @@
     {
       "id": "1d1923df-fdc1-4993-b054-37abced351bb",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Phishing",
-      "card_b_text": "Een nepbericht (e-mail of sms) waarmee criminelen inloggegevens of geld proberen te stelen.",
+      "card_a_text": "Canva",
+      "card_b_text": "Een programma waarmee je ontwerpen maakt",
       "sort_order": 1,
-      "created_at": "2026-09-14T13:04:35.509Z",
-      "updated_at": "2026-09-14T13:04:35.509Z"
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
     },
     {
       "id": "3dde8d11-317f-4dae-90c8-5158114f5e11",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Tweestapsverificatie (2FA)",
-      "card_b_text": "Extra beveiliging naast je wachtwoord, zoals een eenmalige code via sms of app.",
+      "card_a_text": "Sjabloon",
+      "card_b_text": "Een voorbeeld dat je kunt gebruiken in Canva",
       "sort_order": 2,
-      "created_at": "2026-09-14T13:04:35.509Z",
-      "updated_at": "2026-09-14T13:04:35.509Z"
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
     },
     {
       "id": "829a9c28-78d4-4101-8c28-06ac8b077a21",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Sterk wachtwoord",
-      "card_b_text": "Minimaal 12 tekens met hoofdletters, kleine letters, cijfers en speciale symbolen.",
+      "card_a_text": "Tekstvak",
+      "card_b_text": "Een plek waar je tekst kunt typen",
       "sort_order": 3,
-      "created_at": "2026-09-14T13:04:35.509Z",
-      "updated_at": "2026-09-14T13:04:35.509Z"
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
     },
     {
       "id": "11f7c462-66a2-4a8e-8f11-f527743d97d2",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "AVG / GDPR",
-      "card_b_text": "De Europese wet die streng beschermt hoe bedrijven en scholen omgaan met jouw persoonsgegevens.",
+      "card_a_text": "Internetbrowser",
+      "card_b_text": "Een programma waarmee je websites opent",
       "sort_order": 4,
-      "created_at": "2026-09-14T13:04:35.509Z",
-      "updated_at": "2026-09-14T13:04:35.509Z"
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
     },
     {
       "id": "eb27146d-b901-4ed3-824a-02f92e7f4501",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Ransomware (Gijzelsoftware)",
-      "card_b_text": "Kwaadaardig computerprogramma dat al je bestanden blokkeert en losgeld eist.",
+      "card_a_text": "Adresbalk",
+      "card_b_text": "Hier typ je het adres van een website",
       "sort_order": 5,
-      "created_at": "2026-09-14T13:04:35.509Z",
-      "updated_at": "2026-09-14T13:04:35.509Z"
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
     },
     {
       "id": "44486428-43e4-4bb7-be1a-302abf0f8a0c",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Wachtwoordmanager",
-      "card_b_text": "Een digitale kluis die al je unieke wachtwoorden veilig bewaart en automatisch invult.",
+      "card_a_text": "Zoekbalk",
+      "card_b_text": "Hier typ je waar je naar zoekt",
       "sort_order": 6,
-      "created_at": "2026-09-14T13:04:35.509Z",
-      "updated_at": "2026-09-14T13:04:35.509Z"
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
     },
     {
       "id": "b0f7f170-165a-4be8-932c-cb5df959e54c",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Back-up maken",
-      "card_b_text": "Een reservekopie van belangrijke school- en werkbestanden opslaan in de veilige cloud.",
+      "card_a_text": "Tabblad",
+      "card_b_text": "Een extra pagina binnen je internetbrowser",
       "sort_order": 7,
-      "created_at": "2026-09-14T13:04:35.509Z",
-      "updated_at": "2026-09-14T13:04:35.509Z"
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
+    },
+    {
+      "id": "pair-l3-08",
+      "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
+      "card_a_text": "Nieuwe tabblad openen",
+      "card_b_text": "Dit doe je met het plusje (+)",
+      "sort_order": 8,
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
+    },
+    {
+      "id": "pair-l3-09",
+      "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
+      "card_a_text": "Hoofdletter",
+      "card_b_text": "Een grote letter, zoals A, B of C",
+      "sort_order": 9,
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
+    },
+    {
+      "id": "pair-l3-10",
+      "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
+      "card_a_text": "Shift-toets",
+      "card_b_text": "Hiermee typ je tijdelijk een hoofdletter of speciaal teken",
+      "sort_order": 10,
+      "created_at": "2026-09-14T13:10:00.000Z",
+      "updated_at": "2026-09-14T13:10:00.000Z"
+    },
+    {
+      "id": "pair-l1-01",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Is het programma waar je (huis)werk kunt vinden en inleveren",
+      "card_b_text": "Canvas",
+      "sort_order": 1,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-02",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Is een plaatje van jouw gezicht",
+      "card_b_text": "Avatar",
+      "sort_order": 2,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-03",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Is het programma waarmee je plaatjes of posters maakt",
+      "card_b_text": "Canva",
+      "sort_order": 3,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-04",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Dit doe je op wachtwoord.summacollege.nl",
+      "card_b_text": "Wachtwoord aanpassen",
+      "sort_order": 4,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-05",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Hieraan kun je OneDrive herkennen",
+      "card_b_text": "Blauw Wolkje",
+      "sort_order": 5,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-06",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Is een keuzedeel waar je examen in kunt doen",
+      "card_b_text": "Digitale Vaardigheden",
+      "sort_order": 6,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-07",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Hier sla je jouw gemaakte werk op (opslaan)",
+      "card_b_text": "OneDrive",
+      "sort_order": 7,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-08",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Is als je een opdracht niet goed genoeg hebt gemaakt",
+      "card_b_text": "Onvoldoende",
+      "sort_order": 8,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-09",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Dit doe je met de WAVE ID app",
+      "card_b_text": "MFA",
+      "sort_order": 9,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-10",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Hiermee kun je een screenshot maken",
+      "card_b_text": "Knipprogramma",
+      "sort_order": 10,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-11",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Is een extra beveiliging van het Summa",
+      "card_b_text": "Printen",
+      "sort_order": 11,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
+    },
+    {
+      "id": "pair-l1-12",
+      "set_id": "level1-summa-set-id",
+      "card_a_text": "Is een app waar je jouw rooster kunt kijken",
+      "card_b_text": "Eduarte",
+      "sort_order": 12,
+      "created_at": "2026-09-14T13:07:07.566Z",
+      "updated_at": "2026-09-14T13:07:07.566Z"
     }
   ]
 }
