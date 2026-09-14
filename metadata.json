@@ -1,0 +1,6 @@
+{
+  "name": "Summa College Koppelspel",
+  "description": "Educatief koppelspel voor studenten van het Summa College om kennis van een lessenperiode interactief te testen.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
