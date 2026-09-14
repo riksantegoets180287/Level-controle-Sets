@@ -64,5 +64,11 @@
     "userId": "ee03ebda-97b7-4db7-9444-d1749c0f7185",
     "email": "digitalevaardigheden@summacollege.nl",
     "expiresAt": 1791981469292
+  },
+  {
+    "token": "7bd34dbdb213324a1ffb83a10cb90ce6112e03e50cc73211b56238a54dc60a3a",
+    "userId": "ee03ebda-97b7-4db7-9444-d1749c0f7185",
+    "email": "digitalevaardigheden@summacollege.nl",
+    "expiresAt": 1791982157783
   }
 ]
