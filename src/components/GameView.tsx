@@ -1,17 +1,5 @@
 import { FC, useState, useEffect, DragEvent, useMemo } from "react";
-import {
-  RotateCcw,
-  Undo2,
-  CheckCheck,
-  AlertTriangle,
-  Clock,
-  Link2,
-  ArrowLeft,
-  Sparkles,
-  HelpCircle,
-  X,
-  Layers,
-} from "lucide-react";
+import { RotateCcw, Undo2, CheckCheck, TriangleAlert as AlertTriangle, Clock, Link2, ArrowLeft, Sparkles, Circle as HelpCircle, X, Layers } from "lucide-react";
 import { CardSet, PlayableCard, ConnectedPair, GameResult } from "../types";
 import { ResultsModal } from "./ResultsModal";
 import { fireSuccessConfetti } from "../lib/confetti";
@@ -490,23 +478,23 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
 
             {/* Dynamic Instruction text depending on selected card */}
             {selectedCard ? (
-              <span className="font-extrabold text-[#002B49] animate-pulse">
+              <span className="font-semibold text-[#002B49] animate-pulse">
                 {selectedCard.side === "A" ? (
                   <>
                     <span className="text-emerald-700">Groen kaartje</span> geselecteerd. Kies nu een{" "}
-                    <span className="text-blue-700 underline font-black">blauw kaartje</span> dat hierbij hoort!
+                    <span className="text-blue-700 underline font-bold">blauw kaartje</span> dat hierbij hoort!
                   </>
                 ) : (
                   <>
                     <span className="text-blue-700">Blauw kaartje</span> geselecteerd. Kies nu een{" "}
-                    <span className="text-emerald-700 underline font-black">groen kaartje</span> dat hierbij hoort!
+                    <span className="text-emerald-700 underline font-bold">groen kaartje</span> dat hierbij hoort!
                   </>
                 )}
               </span>
             ) : (
-              <span className="font-extrabold text-slate-700">
-                Zoek een <span className="text-emerald-700 font-black">groen</span> en een{" "}
-                <span className="text-blue-700 font-black">blauw</span> kaartje dat bij elkaar hoort.
+              <span className="font-semibold text-slate-700">
+                Zoek een <span className="text-emerald-700 font-bold">groen</span> en een{" "}
+                <span className="text-blue-700 font-bold">blauw</span> kaartje dat bij elkaar hoort.
               </span>
             )}
           </div>
@@ -561,14 +549,14 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
                 >
                   {/* UNDERNEATH GRAY CARD (Tilted -3° with shadow) */}
                   <div className="absolute inset-x-1 inset-y-1 sm:inset-x-1.5 sm:inset-y-1.5 rounded-2xl p-2 sm:p-2.5 flex items-center justify-center text-center shadow-md border-2 bg-slate-500 border-slate-600 text-slate-200 transform -rotate-3 -translate-x-1 -translate-y-0.5 transition-transform group-hover:-rotate-4 group-hover:-translate-x-1.5">
-                    <p className="font-bold text-xs sm:text-sm md:text-base leading-snug line-clamp-3 text-slate-200 opacity-90">
+                    <p className="font-medium text-[10px] sm:text-xs md:text-sm leading-snug line-clamp-3 text-slate-200 opacity-90">
                       {bottomCard.text}
                     </p>
                   </div>
 
                   {/* TOP GRAY CARD (Tilted +2°, overlapping on top, only the concept) */}
                   <div className="relative w-full h-full rounded-2xl p-2 sm:p-3 flex items-center justify-center text-center shadow-lg border-2 bg-slate-400 border-slate-300 text-white transform rotate-2 translate-x-0.5 translate-y-0.5 opacity-95 group-hover:opacity-100 group-hover:rotate-1 group-hover:scale-[1.01] transition-all">
-                    <p className="font-extrabold text-white text-xs sm:text-sm md:text-base lg:text-lg leading-snug line-clamp-4">
+                    <p className="font-semibold text-white text-[10px] sm:text-xs md:text-sm lg:text-base leading-snug line-clamp-4">
                       {topCard.text}
                     </p>
                   </div>
@@ -604,7 +592,7 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
                 }`}
               >
                 {/* ONLY the concept text on the card */}
-                <p className="font-extrabold text-white text-xs sm:text-sm md:text-base lg:text-lg leading-snug line-clamp-4 px-1">
+                <p className="font-semibold text-white text-[10px] sm:text-xs md:text-sm lg:text-base leading-snug line-clamp-4 px-1">
                   {card.text}
                 </p>
               </div>

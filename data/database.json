@@ -27,6 +27,16 @@
       "is_active": true,
       "created_at": "2026-09-14T11:54:16.575Z",
       "updated_at": "2026-09-14T12:55:34.173Z"
+    },
+    {
+      "id": "level3-summa-set-id",
+      "title": "Eindspel Level 3",
+      "description": "Canva, internetbrowser en toetsenbord: ontwerpen, websites en typen.",
+      "instructions": "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
+      "slug": "eindspel-level-3",
+      "is_active": true,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
     }
   ],
   "card_pairs": [
@@ -200,6 +210,96 @@
       "sort_order": 7,
       "created_at": "2026-09-14T12:55:34.173Z",
       "updated_at": "2026-09-14T12:55:34.173Z"
+    },
+    {
+      "id": "pair-l3-01",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Canva",
+      "card_b_text": "Een programma waarmee je ontwerpen maakt",
+      "sort_order": 1,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
+    },
+    {
+      "id": "pair-l3-02",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Sjabloon",
+      "card_b_text": "Een voorbeeld dat je kunt gebruiken in Canva",
+      "sort_order": 2,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
+    },
+    {
+      "id": "pair-l3-03",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Tekstvak",
+      "card_b_text": "Een plek waar je tekst kunt typen",
+      "sort_order": 3,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
+    },
+    {
+      "id": "pair-l3-04",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Internetbrowser",
+      "card_b_text": "Een programma waarmee je websites opent",
+      "sort_order": 4,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
+    },
+    {
+      "id": "pair-l3-05",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Adresbalk",
+      "card_b_text": "Hier typ je het adres van een website",
+      "sort_order": 5,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
+    },
+    {
+      "id": "pair-l3-06",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Zoekbalk",
+      "card_b_text": "Hier typ je waar je naar zoekt",
+      "sort_order": 6,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
+    },
+    {
+      "id": "pair-l3-07",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Tabblad",
+      "card_b_text": "Een extra pagina binnen je internetbrowser",
+      "sort_order": 7,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
+    },
+    {
+      "id": "pair-l3-08",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Nieuwe tabblad openen",
+      "card_b_text": "Dit doe je met het plusje (+)",
+      "sort_order": 8,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
+    },
+    {
+      "id": "pair-l3-09",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Hoofdletter",
+      "card_b_text": "Een grote letter, zoals A, B of C",
+      "sort_order": 9,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
+    },
+    {
+      "id": "pair-l3-10",
+      "set_id": "level3-summa-set-id",
+      "card_a_text": "Shift-toets",
+      "card_b_text": "Hiermee typ je tijdelijk een hoofdletter of speciaal teken",
+      "sort_order": 10,
+      "created_at": "2026-09-14T13:00:00.000Z",
+      "updated_at": "2026-09-14T13:00:00.000Z"
     }
   ]
 }
