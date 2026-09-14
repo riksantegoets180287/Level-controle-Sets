@@ -1,6 +1,7 @@
 import { FC, useState, MouseEvent } from "react";
 import { Play, Copy, Check, Sparkles, Layers, ArrowRight, BookOpen } from "lucide-react";
 import { CardSet } from "../types";
+import { getFullShareUrl, withBasePath } from "../lib/basePath";
 
 interface HomeViewProps {
   cardSets: CardSet[];
@@ -14,10 +15,6 @@ export const HomeView: FC<HomeViewProps> = ({
   onSelectSet,
 }) => {
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
-
-  const getFullShareUrl = (slug: string) => {
-    return `${window.location.origin}/set/${slug}`;
-  };
 
   const handleCopyUrl = (e: MouseEvent, slug: string) => {
     e.stopPropagation();
@@ -112,7 +109,7 @@ export const HomeView: FC<HomeViewProps> = ({
                       </span>
 
                       <span className="text-[11px] font-mono text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
-                        /set/{set.slug}
+                        {withBasePath("/set/")}{set.slug}
                       </span>
                     </div>
 

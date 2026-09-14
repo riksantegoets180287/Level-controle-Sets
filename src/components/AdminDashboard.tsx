@@ -1,19 +1,5 @@
 import { FC, useState } from "react";
-import {
-  Plus,
-  Copy,
-  Check,
-  Edit,
-  CopyPlus,
-  Trash2,
-  Play,
-  KeyRound,
-  LogOut,
-  Layers,
-  Power,
-  Shield,
-  ArrowUpRight,
-} from "lucide-react";
+import { Plus, Copy, Check, CreditCard as Edit, CopyPlus, Trash2, Play, KeyRound, LogOut, Layers, Power, Shield, ArrowUpRight } from "lucide-react";
 import { CardSet, AdminUser } from "../types";
 import {
   duplicateCardSet,
@@ -23,6 +9,7 @@ import {
 } from "../lib/api";
 import { SetEditorModal } from "./SetEditorModal";
 import { ChangePasswordModal } from "./ChangePasswordModal";
+import { getFullShareUrl, withBasePath } from "../lib/basePath";
 
 interface AdminDashboardProps {
   adminUser: AdminUser;
@@ -47,10 +34,6 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-
-  const getFullShareUrl = (slug: string) => {
-    return `${window.location.origin}/set/${slug}`;
-  };
 
   const handleCopyUrl = (slug: string) => {
     const url = getFullShareUrl(slug);
@@ -263,7 +246,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
                       </span>
 
                       <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                        /set/{set.slug}
+                        {withBasePath("/set/")}{set.slug}
                       </span>
                     </div>
 

@@ -965,7 +965,8 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    // SPA fallback: serve index.html for any non-API route
+    app.get(/^\/(?!api\/).*/, (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

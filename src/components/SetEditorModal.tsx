@@ -1,17 +1,8 @@
 import { FC, useState, useEffect, FormEvent } from "react";
-import {
-  X,
-  Plus,
-  Trash2,
-  ArrowUp,
-  ArrowDown,
-  Image as ImageIcon,
-  AlertCircle,
-  Save,
-  Layers,
-} from "lucide-react";
+import { X, Plus, Trash2, ArrowUp, ArrowDown, Image as ImageIcon, CircleAlert as AlertCircle, Save, Layers } from "lucide-react";
 import { CardSet } from "../types";
 import { createCardSet, updateCardSet } from "../lib/api";
+import { withBasePath } from "../lib/basePath";
 
 interface SetEditorModalProps {
   isOpen: boolean;
@@ -292,7 +283,7 @@ export const SetEditorModal: FC<SetEditorModalProps> = ({
                 </label>
                 <div className="flex items-center">
                   <span className="text-xs text-slate-500 bg-slate-200 px-3 py-2.5 rounded-l-xl border border-r-0 border-slate-200 font-mono">
-                    /set/
+                    {withBasePath("/set/")}
                   </span>
                   <input
                     id="set-slug-input"

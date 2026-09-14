@@ -11,7 +11,8 @@ import {
   checkAdminSession,
   adminLogout,
 } from "./lib/api";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { CircleAlert as AlertCircle, ArrowLeft } from "lucide-react";
+import { withBasePath, stripBasePath } from "./lib/basePath";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<
@@ -82,7 +83,7 @@ export default function App() {
   // URL routing on initial mount and browser back/forward
   useEffect(() => {
     const handleUrlRoute = () => {
-      const path = window.location.pathname;
+      const path = stripBasePath(window.location.pathname);
       const searchParams = new URLSearchParams(window.location.search);
       const querySet = searchParams.get("set");
 
@@ -119,8 +120,8 @@ export default function App() {
     setErrorMessage(null);
     setActiveSet(null);
     setCurrentView("home");
-    if (window.location.pathname !== "/") {
-      window.history.pushState({ view: "home" }, "", "/");
+    if (window.location.pathname !== withBasePath("/")) {
+      window.history.pushState({ view: "home" }, "", withBasePath("/"));
     }
   };
 
@@ -131,8 +132,8 @@ export default function App() {
     } else {
       setCurrentView("admin-login");
     }
-    if (window.location.pathname !== "/admin") {
-      window.history.pushState({ view: "admin" }, "", "/admin");
+    if (window.location.pathname !== withBasePath("/admin")) {
+      window.history.pushState({ view: "admin" }, "", withBasePath("/admin"));
     }
   };
 
