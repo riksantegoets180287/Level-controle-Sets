@@ -31,7 +31,7 @@
     {
       "id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
       "title": "Eindspel Level 3",
-      "description": "Canva, internetbrowser en toetsenbord: ontwerpen, websites en typen.",
+      "description": "Documenten maken en opmaken: Word, PDF, opslaan, delen en letters.",
       "instructions": "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
       "slug": "eindspel-level-3",
       "is_active": true,
@@ -106,92 +106,92 @@
     {
       "id": "1d1923df-fdc1-4993-b054-37abced351bb",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Canva",
-      "card_b_text": "Een programma waarmee je ontwerpen maakt",
+      "card_a_text": "Document",
+      "card_b_text": "Een bestand met tekst, afbeeldingen of tabellen",
       "sort_order": 1,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "3dde8d11-317f-4dae-90c8-5158114f5e11",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Sjabloon",
-      "card_b_text": "Een voorbeeld dat je kunt gebruiken in Canva",
+      "card_a_text": "Alinea",
+      "card_b_text": "Een stukje tekst dat bij elkaar hoort",
       "sort_order": 2,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "829a9c28-78d4-4101-8c28-06ac8b077a21",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Tekstvak",
-      "card_b_text": "Een plek waar je tekst kunt typen",
+      "card_a_text": "Opslaan",
+      "card_b_text": "Je werk bewaren zodat je het later terug kunt vinden",
       "sort_order": 3,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "11f7c462-66a2-4a8e-8f11-f527743d97d2",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Internetbrowser",
-      "card_b_text": "Een programma waarmee je websites opent",
+      "card_a_text": "Arceren/Markeren",
+      "card_b_text": "Tekst een kleur geven om deze extra duidelijk te maken",
       "sort_order": 4,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "eb27146d-b901-4ed3-824a-02f92e7f4501",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Adresbalk",
-      "card_b_text": "Hier typ je het adres van een website",
+      "card_a_text": "PDF",
+      "card_b_text": "Een bestand dat er op elke computer bijna hetzelfde uitziet",
       "sort_order": 5,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "44486428-43e4-4bb7-be1a-302abf0f8a0c",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Zoekbalk",
-      "card_b_text": "Hier typ je waar je naar zoekt",
+      "card_a_text": "Word",
+      "card_b_text": "Een programma waarmee je teksten en documenten maakt",
       "sort_order": 6,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "b0f7f170-165a-4be8-932c-cb5df959e54c",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Tabblad",
-      "card_b_text": "Een extra pagina binnen je internetbrowser",
+      "card_a_text": "OneDrive",
+      "card_b_text": "Een online plek waar je bestanden kunt bewaren",
       "sort_order": 7,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "pair-l3-08",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Nieuwe tabblad openen",
-      "card_b_text": "Dit doe je met het plusje (+)",
+      "card_a_text": "Delen",
+      "card_b_text": "Iemand anders toegang geven tot jouw bestand",
       "sort_order": 8,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "pair-l3-09",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Hoofdletter",
-      "card_b_text": "Een grote letter, zoals A, B of C",
+      "card_a_text": "Lettertype",
+      "card_b_text": "De vorm en stijl van letters",
       "sort_order": 9,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "pair-l3-10",
       "set_id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "card_a_text": "Shift-toets",
-      "card_b_text": "Hiermee typ je tijdelijk een hoofdletter of speciaal teken",
+      "card_a_text": "Lettergrootte",
+      "card_b_text": "Hoe groot of klein de letters zijn",
       "sort_order": 10,
-      "created_at": "2026-09-14T13:10:00.000Z",
-      "updated_at": "2026-09-14T13:10:00.000Z"
+      "created_at": "2026-09-14T13:15:00.000Z",
+      "updated_at": "2026-09-14T13:15:00.000Z"
     },
     {
       "id": "pair-l1-01",
