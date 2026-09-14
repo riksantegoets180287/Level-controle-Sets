@@ -30,13 +30,13 @@
     },
     {
       "id": "4df89a43-b24b-45fe-a47e-d3d69d46d440",
-      "title": "Eindspel level 2 (Kopie)",
+      "title": "Eindspel level 3",
       "description": "",
       "instructions": "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
       "slug": "veiligheid-online-kopie",
       "is_active": false,
       "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:16.308Z"
+      "updated_at": "2026-09-14T13:04:35.509Z"
     }
   ],
   "card_pairs": [
@@ -217,8 +217,8 @@
       "card_a_text": "Phishing",
       "card_b_text": "Een nepbericht (e-mail of sms) waarmee criminelen inloggegevens of geld proberen te stelen.",
       "sort_order": 1,
-      "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:16.308Z"
+      "created_at": "2026-09-14T13:04:35.509Z",
+      "updated_at": "2026-09-14T13:04:35.509Z"
     },
     {
       "id": "3dde8d11-317f-4dae-90c8-5158114f5e11",
@@ -226,8 +226,8 @@
       "card_a_text": "Tweestapsverificatie (2FA)",
       "card_b_text": "Extra beveiliging naast je wachtwoord, zoals een eenmalige code via sms of app.",
       "sort_order": 2,
-      "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:16.308Z"
+      "created_at": "2026-09-14T13:04:35.509Z",
+      "updated_at": "2026-09-14T13:04:35.509Z"
     },
     {
       "id": "829a9c28-78d4-4101-8c28-06ac8b077a21",
@@ -235,8 +235,8 @@
       "card_a_text": "Sterk wachtwoord",
       "card_b_text": "Minimaal 12 tekens met hoofdletters, kleine letters, cijfers en speciale symbolen.",
       "sort_order": 3,
-      "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:16.308Z"
+      "created_at": "2026-09-14T13:04:35.509Z",
+      "updated_at": "2026-09-14T13:04:35.509Z"
     },
     {
       "id": "11f7c462-66a2-4a8e-8f11-f527743d97d2",
@@ -244,8 +244,8 @@
       "card_a_text": "AVG / GDPR",
       "card_b_text": "De Europese wet die streng beschermt hoe bedrijven en scholen omgaan met jouw persoonsgegevens.",
       "sort_order": 4,
-      "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:16.308Z"
+      "created_at": "2026-09-14T13:04:35.509Z",
+      "updated_at": "2026-09-14T13:04:35.509Z"
     },
     {
       "id": "eb27146d-b901-4ed3-824a-02f92e7f4501",
@@ -253,8 +253,8 @@
       "card_a_text": "Ransomware (Gijzelsoftware)",
       "card_b_text": "Kwaadaardig computerprogramma dat al je bestanden blokkeert en losgeld eist.",
       "sort_order": 5,
-      "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:16.308Z"
+      "created_at": "2026-09-14T13:04:35.509Z",
+      "updated_at": "2026-09-14T13:04:35.509Z"
     },
     {
       "id": "44486428-43e4-4bb7-be1a-302abf0f8a0c",
@@ -262,8 +262,8 @@
       "card_a_text": "Wachtwoordmanager",
       "card_b_text": "Een digitale kluis die al je unieke wachtwoorden veilig bewaart en automatisch invult.",
       "sort_order": 6,
-      "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:16.308Z"
+      "created_at": "2026-09-14T13:04:35.509Z",
+      "updated_at": "2026-09-14T13:04:35.509Z"
     },
     {
       "id": "b0f7f170-165a-4be8-932c-cb5df959e54c",
@@ -271,8 +271,8 @@
       "card_a_text": "Back-up maken",
       "card_b_text": "Een reservekopie van belangrijke school- en werkbestanden opslaan in de veilige cloud.",
       "sort_order": 7,
-      "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:16.308Z"
+      "created_at": "2026-09-14T13:04:35.509Z",
+      "updated_at": "2026-09-14T13:04:35.509Z"
     }
   ]
 }
