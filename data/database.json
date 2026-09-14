@@ -34,9 +34,9 @@
       "description": "",
       "instructions": "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
       "slug": "veiligheid-online-kopie",
-      "is_active": false,
+      "is_active": true,
       "created_at": "2026-09-14T13:04:16.308Z",
-      "updated_at": "2026-09-14T13:04:35.509Z"
+      "updated_at": "2026-09-14T13:04:37.590Z"
     }
   ],
   "card_pairs": [
