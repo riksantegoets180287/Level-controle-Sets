@@ -173,7 +173,7 @@ export async function createCardSet(setPayload: any) {
       .insert(pairs);
 
     if (pairsError) {
-      throw new Error("Kon kaartparen niet opslaan.");
+      throw new Error(pairsError.message || "Kon kaartparen niet opslaan.");
     }
   }
 
@@ -224,7 +224,7 @@ export async function updateCardSet(id: string, setPayload: any) {
       .insert(pairs);
 
     if (pairsError) {
-      throw new Error("Kon kaartparen niet opslaan.");
+      throw new Error(pairsError.message || "Kon kaartparen niet opslaan.");
     }
   }
 
