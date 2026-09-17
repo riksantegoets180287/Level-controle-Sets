@@ -738,14 +738,14 @@ apiRouter.patch("/api/admin/sets/:id/toggle-active", requireAuth, async (req, re
   res.json({ success: true, isActive: updated.is_active });
 });
 
-// Mount API router at both root and base path so it works in dev and production
-app.use(apiRouter);
-app.use(BASE_PATH, apiRouter);
-
 // ----------------------------------------------------
 // Vite and Static Serving
 // ----------------------------------------------------
 const BASE_PATH = "/leveleinde";
+
+// Mount API router at both root and base path so it works in dev and production
+app.use(apiRouter);
+app.use(BASE_PATH, apiRouter);
 
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
