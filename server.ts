@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import crypto from "crypto";
 import { createServer as createViteServer } from "vite";
+import { createClient } from "@supabase/supabase-js";
 
 const app = express();
 const PORT = 3000;
@@ -10,11 +11,25 @@ const PORT = 3000;
 app.use(express.json({ limit: '10mb' }));
 
 // ----------------------------------------------------
-// Database & Storage
+// Supabase Client (service role — bypasses RLS)
 // ----------------------------------------------------
-const DATA_DIR = path.join(process.cwd(), "data");
-const DB_FILE = path.join(DATA_DIR, "database.json");
+import dotenv from "dotenv";
+dotenv.config();
 
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "";
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error("Missing Supabase environment variables. Check .env file.");
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+// ----------------------------------------------------
+// Password hashing (unchanged)
+// ----------------------------------------------------
 function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString("hex");
   const derivedKey = crypto.scryptSync(password, salt, 64);
@@ -36,45 +51,12 @@ function verifyPassword(password: string, storedHash: string): boolean {
   }
 }
 
-interface StoredAdminUser {
-  id: string;
-  email: string;
-  password_hash: string;
-  created_at: string;
-}
-
-interface StoredCardPair {
-  id: string;
-  set_id: string;
-  card_a_text: string;
-  card_b_text: string;
-  card_a_image_url?: string;
-  card_b_image_url?: string;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-interface StoredCardSet {
-  id: string;
-  title: string;
-  description: string;
-  instructions?: string;
-  slug: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-interface DatabaseSchema {
-  admin_users: StoredAdminUser[];
-  card_sets: StoredCardSet[];
-  card_pairs: StoredCardPair[];
-}
-
+// ----------------------------------------------------
+// Sessions (file-based, unchanged)
+// ----------------------------------------------------
+const DATA_DIR = path.join(process.cwd(), "data");
 const SESSIONS_FILE = path.join(DATA_DIR, "sessions.json");
 
-// Active sessions memory store with file persistence
 const activeSessions = new Map<string, { userId: string; email: string; expiresAt: number }>();
 
 function loadSessions() {
@@ -97,6 +79,9 @@ function loadSessions() {
 
 function saveSessions() {
   try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
     const list: any[] = [];
     const now = Date.now();
     activeSessions.forEach((val, token) => {
@@ -119,480 +104,6 @@ function generateSlug(text: string): string {
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
-}
-
-function initDatabase(): DatabaseSchema {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-
-  if (fs.existsSync(DB_FILE)) {
-    try {
-      const content = fs.readFileSync(DB_FILE, "utf-8");
-      return JSON.parse(content) as DatabaseSchema;
-    } catch (err) {
-      console.error("Error reading database file, re-initializing:", err);
-    }
-  }
-
-  // Initial seed
-  const initialAdminId = crypto.randomUUID();
-  const initialUser: StoredAdminUser = {
-    id: initialAdminId,
-    email: "digitalevaardigheden@summacollege.nl",
-    password_hash: hashPassword("OG7~55(5u1in"),
-    created_at: new Date().toISOString(),
-  };
-
-  const set0Id = crypto.randomUUID();
-  const set1Id = crypto.randomUUID();
-  const set2Id = crypto.randomUUID();
-  const set3Id = crypto.randomUUID();
-  const set4Id = crypto.randomUUID();
-  const now = new Date().toISOString();
-
-  const initialSets: StoredCardSet[] = [
-    {
-      id: set0Id,
-      title: "Eindspel Level 1",
-      description: "Digitale Vaardigheden: programma's, accounts en beveiliging van het Summa College.",
-      instructions: "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
-      slug: "eindspel-level-1",
-      is_active: true,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: set1Id,
-      title: "Digitale Veiligheid & Privacy",
-      description: "Test je kennis over online veiligheid, sterke wachtwoorden en privacybescherming.",
-      instructions: "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
-      slug: "veiligheid-online",
-      is_active: true,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: set2Id,
-      title: "Beroepshouding & Stage",
-      description: "Leer hoe je je professioneel en collegiaal gedraagt op je stage of werkvloer.",
-      instructions: "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
-      slug: "beroepshouding",
-      is_active: true,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: set3Id,
-      title: "Social Media & Online Gedrag",
-      description: "Wat mag wel en wat mag absoluut niet op social media in je opleiding en werk?",
-      instructions: "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
-      slug: "social-media",
-      is_active: true,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: set4Id,
-      title: "Eindspel Level 3",
-      description: "Documenten maken en opmaken: Word, PDF, opslaan, delen en letters.",
-      instructions: "Zoek een groen en een blauw kaartje dat bij elkaar hoort.",
-      slug: "eindspel-level-3",
-      is_active: true,
-      created_at: now,
-      updated_at: now,
-    },
-  ];
-
-  const initialPairs: StoredCardPair[] = [
-    // Set 0 (Eindspel Level 1)
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Blauw Wolkje",
-      card_b_text: "Hieraan kun je OneDrive herkennen",
-      sort_order: 1,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "MFA",
-      card_b_text: "Is een extra beveiliging van het Summa",
-      sort_order: 2,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Onvoldoende",
-      card_b_text: "Is als je een opdracht niet goed genoeg hebt gemaakt",
-      sort_order: 3,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "OneDrive",
-      card_b_text: "Hier sla je jouw gemaakte werk op",
-      sort_order: 4,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Eduarte",
-      card_b_text: "Is een app waar je jouw rooster kunt bekijken",
-      sort_order: 5,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Digitale Vaardigheden",
-      card_b_text: "Is een keuzedeel waarin je examen kunt doen",
-      sort_order: 6,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Printen",
-      card_b_text: "Dit doe je met de WAVE ID-app",
-      sort_order: 7,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Canvas",
-      card_b_text: "Is het programma waar je (huis)werk kunt vinden en inleveren",
-      sort_order: 8,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Knipprogramma",
-      card_b_text: "Hiermee kun je een screenshot maken",
-      sort_order: 9,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Canva",
-      card_b_text: "Is het programma waarmee je plaatjes of posters maakt",
-      sort_order: 10,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Avatar",
-      card_b_text: "Is een plaatje van jouw gezicht",
-      sort_order: 11,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set0Id,
-      card_a_text: "Wachtwoord aanpassen",
-      card_b_text: "Dit doe je op wachtwoord.summacollege.nl",
-      sort_order: 12,
-      created_at: now,
-      updated_at: now,
-    },
-    // Set 1
-    {
-      id: crypto.randomUUID(),
-      set_id: set1Id,
-      card_a_text: "Phishing",
-      card_b_text: "Een nepbericht (e-mail of sms) waarmee criminelen inloggegevens of geld proberen te stelen.",
-      sort_order: 1,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set1Id,
-      card_a_text: "Tweestapsverificatie (2FA)",
-      card_b_text: "Extra beveiliging naast je wachtwoord, zoals een eenmalige code via sms of app.",
-      sort_order: 2,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set1Id,
-      card_a_text: "Sterk wachtwoord",
-      card_b_text: "Minimaal 12 tekens met hoofdletters, kleine letters, cijfers en speciale symbolen.",
-      sort_order: 3,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set1Id,
-      card_a_text: "AVG / GDPR",
-      card_b_text: "De Europese wet die streng beschermt hoe bedrijven en scholen omgaan met jouw persoonsgegevens.",
-      sort_order: 4,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set1Id,
-      card_a_text: "Ransomware (Gijzelsoftware)",
-      card_b_text: "Kwaadaardig computerprogramma dat al je bestanden blokkeert en losgeld eist.",
-      sort_order: 5,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set1Id,
-      card_a_text: "Wachtwoordmanager",
-      card_b_text: "Een digitale kluis die al je unieke wachtwoorden veilig bewaart en automatisch invult.",
-      sort_order: 6,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set1Id,
-      card_a_text: "Back-up maken",
-      card_b_text: "Een reservekopie van belangrijke school- en werkbestanden opslaan in de veilige cloud.",
-      sort_order: 7,
-      created_at: now,
-      updated_at: now,
-    },
-
-    // Set 2
-    {
-      id: crypto.randomUUID(),
-      set_id: set2Id,
-      card_a_text: "Op tijd komen",
-      card_b_text: "Altijd minimaal 5 tot 10 minuten vóór de afgesproken aanvangstijd aanwezig zijn.",
-      sort_order: 1,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set2Id,
-      card_a_text: "Feedback ontvangen",
-      card_b_text: "Aandachtig en rustig luisteren zonder meteen in de verdediging te schieten.",
-      sort_order: 2,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set2Id,
-      card_a_text: "Actief luisteren",
-      card_b_text: "Oogcontact houden, knikken en in eigen woorden herhalen wat de cliënt of collega vertelt.",
-      sort_order: 3,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set2Id,
-      card_a_text: "Representatieve kleding",
-      card_b_text: "Schone en gepaste kleding dragen volgens de veiligheids- en kledingvoorschriften van het bedrijf.",
-      sort_order: 4,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set2Id,
-      card_a_text: "Ziekmelding doen",
-      card_b_text: "Voor aanvang van de werkdag altijd persoonlijk telefonisch contact opnemen met je leidinggevende.",
-      sort_order: 5,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set2Id,
-      card_a_text: "Collegialiteit",
-      card_b_text: "Een collega uit eigen beweging te hulp schieten wanneer die het overduidelijk druk heeft.",
-      sort_order: 6,
-      created_at: now,
-      updated_at: now,
-    },
-
-    // Set 3
-    {
-      id: crypto.randomUUID(),
-      set_id: set3Id,
-      card_a_text: "Foto van cliënt of klant",
-      card_b_text: "Strikt verboden om te delen op sociale media vanwege het beroepsgeheim en privacywetgeving.",
-      sort_order: 1,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set3Id,
-      card_a_text: "Digitale voetafdruk",
-      card_b_text: "Alles wat je ooit online post, liket of deelt en wat toekomstige werkgevers kunnen terugvinden.",
-      sort_order: 2,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set3Id,
-      card_a_text: "Desinformatie (Fake News)",
-      card_b_text: "Opzettelijk verspreide onware berichten om mensen bang te maken of te beïnvloeden.",
-      sort_order: 3,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set3Id,
-      card_a_text: "Cyberpesten",
-      card_b_text: "Iemand online herhaaldelijk beledigen of buitensluiten; moet altijd direct gemeld worden.",
-      sort_order: 4,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set3Id,
-      card_a_text: "Locatie delen bij afwezigheid",
-      card_b_text: "Verstandig om niet openbaar te posten dat je op vakantie bent en je huis leegstaat.",
-      sort_order: 5,
-      created_at: now,
-      updated_at: now,
-    },
-
-    // Set 4 (Eindspel Level 3)
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "Document",
-      card_b_text: "Een bestand met tekst, afbeeldingen of tabellen",
-      sort_order: 1,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "Alinea",
-      card_b_text: "Een stukje tekst dat bij elkaar hoort",
-      sort_order: 2,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "Opslaan",
-      card_b_text: "Je werk bewaren zodat je het later terug kunt vinden",
-      sort_order: 3,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "Arceren/Markeren",
-      card_b_text: "Tekst een kleur geven om deze extra duidelijk te maken",
-      sort_order: 4,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "PDF",
-      card_b_text: "Een bestand dat er op elke computer bijna hetzelfde uitziet",
-      sort_order: 5,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "Word",
-      card_b_text: "Een programma waarmee je teksten en documenten maakt",
-      sort_order: 6,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "OneDrive",
-      card_b_text: "Een online plek waar je bestanden kunt bewaren",
-      sort_order: 7,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "Delen",
-      card_b_text: "Iemand anders toegang geven tot jouw bestand",
-      sort_order: 8,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "Lettertype",
-      card_b_text: "De vorm en stijl van letters",
-      sort_order: 9,
-      created_at: now,
-      updated_at: now,
-    },
-    {
-      id: crypto.randomUUID(),
-      set_id: set4Id,
-      card_a_text: "Lettergrootte",
-      card_b_text: "Hoe groot of klein de letters zijn",
-      sort_order: 10,
-      created_at: now,
-      updated_at: now,
-    },
-  ];
-
-  const db: DatabaseSchema = {
-    admin_users: [initialUser],
-    card_sets: initialSets,
-    card_pairs: initialPairs,
-  };
-
-  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf-8");
-  return db;
-}
-
-let db = initDatabase();
-
-function saveDatabase() {
-  try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), "utf-8");
-  } catch (err) {
-    console.error("Error saving database:", err);
-  }
 }
 
 // ----------------------------------------------------
@@ -621,21 +132,31 @@ function requireAuth(req: express.Request, res: express.Response, next: express.
 // ----------------------------------------------------
 
 // Auth routes
-app.post("/api/auth/quick-login", (req, res) => {
-  let user = db.admin_users[0];
+app.post("/api/auth/quick-login", async (req, res) => {
+  const { data: users } = await supabase
+    .from("admin_users")
+    .select("*")
+    .limit(1);
+
+  let user = users?.[0];
   if (!user) {
-    user = {
-      id: crypto.randomUUID(),
+    const newUser = {
       email: "digitalevaardigheden@summacollege.nl",
       password_hash: hashPassword("Summa2025!"),
-      created_at: new Date().toISOString(),
     };
-    db.admin_users.push(user);
-    saveDatabase();
+    const { data: inserted, error } = await supabase
+      .from("admin_users")
+      .insert(newUser)
+      .select()
+      .single();
+    if (error) {
+      return res.status(500).json({ error: "Kon geen admin-account aanmaken." });
+    }
+    user = inserted;
   }
 
   const token = crypto.randomBytes(32).toString("hex");
-  const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+  const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
   activeSessions.set(token, { userId: user.id, email: user.email, expiresAt });
   saveSessions();
 
@@ -649,16 +170,21 @@ app.post("/api/auth/quick-login", (req, res) => {
   });
 });
 
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: "Vul een e-mailadres en wachtwoord in." });
   }
 
   const cleanEmail = email.trim().toLowerCase();
-  let user = db.admin_users.find(u => u.email.toLowerCase() === cleanEmail);
 
-  // Common accepted passwords for convenience or teacher testing
+  const { data: existingUsers } = await supabase
+    .from("admin_users")
+    .select("*")
+    .ilike("email", cleanEmail);
+
+  let user = existingUsers?.[0];
+
   const trimmedPass = String(password).trim();
   const isAcceptedPass =
     trimmedPass === "OG7~55(5u1in" ||
@@ -669,16 +195,30 @@ app.post("/api/auth/login", (req, res) => {
     (user && verifyPassword(trimmedPass, user.password_hash));
 
   if (!user && (isAcceptedPass || cleanEmail.includes("@") || cleanEmail.includes("summa"))) {
-    user = {
-      id: crypto.randomUUID(),
+    const newUser = {
       email: cleanEmail,
       password_hash: hashPassword(trimmedPass || "Summa2025!"),
-      created_at: new Date().toISOString(),
     };
-    db.admin_users.push(user);
-    saveDatabase();
+    const { data: inserted } = await supabase
+      .from("admin_users")
+      .insert(newUser)
+      .select()
+      .single();
+    user = inserted || undefined;
+
+    if (!user) {
+      const { data: fallback } = await supabase
+        .from("admin_users")
+        .select("*")
+        .limit(1);
+      user = fallback?.[0];
+    }
   } else if (!user) {
-    user = db.admin_users[0];
+    const { data: fallback } = await supabase
+      .from("admin_users")
+      .select("*")
+      .limit(1);
+    user = fallback?.[0];
   }
 
   if (!user) {
@@ -691,7 +231,7 @@ app.post("/api/auth/login", (req, res) => {
   }
 
   const token = crypto.randomBytes(32).toString("hex");
-  const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+  const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
   activeSessions.set(token, { userId: user.id, email: user.email, expiresAt });
   saveSessions();
 
@@ -724,7 +264,7 @@ app.post("/api/auth/logout", requireAuth, (req, res) => {
   res.json({ success: true });
 });
 
-app.post("/api/auth/change-password", requireAuth, (req, res) => {
+app.post("/api/auth/change-password", requireAuth, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   const userSession = (req as any).user;
 
@@ -736,7 +276,12 @@ app.post("/api/auth/change-password", requireAuth, (req, res) => {
     return res.status(400).json({ error: "Het nieuwe wachtwoord moet minimaal 8 tekens lang zijn." });
   }
 
-  const user = db.admin_users.find(u => u.id === userSession.userId);
+  const { data: user } = await supabase
+    .from("admin_users")
+    .select("*")
+    .eq("id", userSession.userId)
+    .single();
+
   if (!user) {
     return res.status(404).json({ error: "Gebruiker niet gevonden." });
   }
@@ -751,15 +296,20 @@ app.post("/api/auth/change-password", requireAuth, (req, res) => {
     return res.status(400).json({ error: "Het huidige wachtwoord klopt niet." });
   }
 
-  user.password_hash = hashPassword(newPassword);
-  saveDatabase();
+  const { error } = await supabase
+    .from("admin_users")
+    .update({ password_hash: hashPassword(newPassword) })
+    .eq("id", user.id);
+
+  if (error) {
+    return res.status(500).json({ error: "Kon wachtwoord niet opslaan." });
+  }
 
   res.json({ success: true, message: "Wachtwoord succesvol gewijzigd." });
 });
 
 // Card Sets Public routes
-app.get("/api/sets", (req, res) => {
-  // Check if admin token is present to see all sets (including inactive)
+app.get("/api/sets", async (req, res) => {
   const authHeader = req.headers.authorization;
   let isAdmin = false;
   if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -770,49 +320,74 @@ app.get("/api/sets", (req, res) => {
     }
   }
 
-  const sets = db.card_sets
-    .filter(s => isAdmin || s.is_active)
-    .map(s => {
-      const pairCount = db.card_pairs.filter(p => p.set_id === s.id).length;
-      return {
-        id: s.id,
-        title: s.title,
-        description: s.description,
-        instructions: s.instructions,
-        slug: s.slug,
-        isActive: s.is_active,
-        createdAt: s.created_at,
-        updatedAt: s.updated_at,
-        pairCount,
-      };
-    })
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  let query = supabase.from("card_sets").select("*");
+  if (!isAdmin) {
+    query = query.eq("is_active", true);
+  }
 
-  res.json({ sets });
+  const { data: sets, error } = await query.order("created_at", { ascending: false });
+
+  if (error) {
+    return res.status(500).json({ error: "Kon kaartensets niet ophalen." });
+  }
+
+  const result = [];
+  for (const s of sets || []) {
+    const { count } = await supabase
+      .from("card_pairs")
+      .select("*", { count: "exact", head: true })
+      .eq("set_id", s.id);
+
+    result.push({
+      id: s.id,
+      title: s.title,
+      description: s.description,
+      instructions: s.instructions,
+      slug: s.slug,
+      isActive: s.is_active,
+      createdAt: s.created_at,
+      updatedAt: s.updated_at,
+      pairCount: count || 0,
+    });
+  }
+
+  res.json({ sets: result });
 });
 
-app.get("/api/sets/:slugOrId", (req, res) => {
+app.get("/api/sets/:slugOrId", async (req, res) => {
   const { slugOrId } = req.params;
-  const set = db.card_sets.find(s => s.id === slugOrId || s.slug === slugOrId);
 
-  if (!set) {
+  const { data: set, error } = await supabase
+    .from("card_sets")
+    .select("*")
+    .or(`id.eq.${slugOrId},slug.eq.${slugOrId}`)
+    .maybeSingle();
+
+  if (error || !set) {
     return res.status(404).json({ error: "Kaartenset niet gevonden." });
   }
 
-  const pairs = db.card_pairs
-    .filter(p => p.set_id === set.id)
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map(p => ({
-      id: p.id,
-      setId: p.set_id,
-      cardAText: p.card_a_text,
-      cardBText: p.card_b_text,
-      cardAImageUrl: p.card_a_image_url,
-      cardBImageUrl: p.card_b_image_url,
-      sortOrder: p.sort_order,
-      createdAt: p.created_at,
-      updatedAt: p.updated_at,
-    }));
+  const { data: pairs, error: pairsError } = await supabase
+    .from("card_pairs")
+    .select("*")
+    .eq("set_id", set.id)
+    .order("sort_order", { ascending: true });
+
+  if (pairsError) {
+    return res.status(500).json({ error: "Kon kaartparen niet ophalen." });
+  }
+
+  const mappedPairs = (pairs || []).map(p => ({
+    id: p.id,
+    setId: p.set_id,
+    cardAText: p.card_a_text,
+    cardBText: p.card_b_text,
+    cardAImageUrl: p.card_a_image_url,
+    cardBImageUrl: p.card_b_image_url,
+    sortOrder: p.sort_order,
+    createdAt: p.created_at,
+    updatedAt: p.updated_at,
+  }));
 
   res.json({
     set: {
@@ -824,14 +399,14 @@ app.get("/api/sets/:slugOrId", (req, res) => {
       isActive: set.is_active,
       createdAt: set.created_at,
       updatedAt: set.updated_at,
-      pairCount: pairs.length,
-      pairs,
+      pairCount: mappedPairs.length,
+      pairs: mappedPairs,
     },
   });
 });
 
 // Admin Card Set Management Routes
-app.post("/api/admin/sets", requireAuth, (req, res) => {
+app.post("/api/admin/sets", requireAuth, async (req, res) => {
   const { title, description, instructions, isActive, pairs, slug: customSlug } = req.body;
 
   if (!title || !title.trim()) {
@@ -842,7 +417,6 @@ app.post("/api/admin/sets", requireAuth, (req, res) => {
     return res.status(400).json({ error: "Een kaartenset moet minimaal 2 kaartparen bevatten." });
   }
 
-  // Validate pairs
   for (let i = 0; i < pairs.length; i++) {
     const p = pairs[i];
     if (!p.cardAText || !p.cardAText.trim() || !p.cardBText || !p.cardBText.trim()) {
@@ -852,61 +426,93 @@ app.post("/api/admin/sets", requireAuth, (req, res) => {
     }
   }
 
-  // Compute unique slug
   let slug = customSlug ? generateSlug(customSlug) : generateSlug(title);
   if (!slug) slug = `set-${Date.now()}`;
 
+  const { data: existing } = await supabase
+    .from("card_sets")
+    .select("slug")
+    .eq("slug", slug)
+    .maybeSingle();
+
   let originalSlug = slug;
   let counter = 1;
-  while (db.card_sets.some(s => s.slug === slug)) {
-    slug = `${originalSlug}-${counter}`;
+  let checkSlug = slug;
+  while (existing) {
+    checkSlug = `${originalSlug}-${counter}`;
+    const { data: conflict } = await supabase
+      .from("card_sets")
+      .select("slug")
+      .eq("slug", checkSlug)
+      .maybeSingle();
+    if (!conflict) break;
     counter++;
   }
+  slug = checkSlug;
 
   const setId = crypto.randomUUID();
   const now = new Date().toISOString();
 
-  const newSet: StoredCardSet = {
-    id: setId,
-    title: title.trim(),
-    description: (description || "").trim(),
-    instructions: (instructions || "").trim(),
-    slug,
-    is_active: isActive !== false,
-    created_at: now,
-    updated_at: now,
-  };
+  const { data: newSet, error: setError } = await supabase
+    .from("card_sets")
+    .insert({
+      id: setId,
+      title: title.trim(),
+      description: (description || "").trim(),
+      instructions: (instructions || "").trim(),
+      slug,
+      is_active: isActive !== false,
+      created_at: now,
+      updated_at: now,
+    })
+    .select()
+    .single();
 
-  const newPairs: StoredCardPair[] = pairs.map((p: any, idx: number) => ({
+  if (setError) {
+    return res.status(500).json({ error: "Kon kaartenset niet opslaan." });
+  }
+
+  const pairRows = pairs.map((p: any, idx: number) => ({
     id: crypto.randomUUID(),
     set_id: setId,
     card_a_text: p.cardAText.trim(),
     card_b_text: p.cardBText.trim(),
-    card_a_image_url: p.cardAImageUrl?.trim() || undefined,
-    card_b_image_url: p.cardBImageUrl?.trim() || undefined,
+    card_a_image_url: p.cardAImageUrl?.trim() || null,
+    card_b_image_url: p.cardBImageUrl?.trim() || null,
     sort_order: typeof p.sortOrder === "number" ? p.sortOrder : idx + 1,
     created_at: now,
     updated_at: now,
   }));
 
-  db.card_sets.push(newSet);
-  db.card_pairs.push(...newPairs);
-  saveDatabase();
+  const { data: newPairs, error: pairsError } = await supabase
+    .from("card_pairs")
+    .insert(pairRows)
+    .select();
+
+  if (pairsError) {
+    await supabase.from("card_sets").delete().eq("id", setId);
+    return res.status(500).json({ error: "Kon kaartparen niet opslaan." });
+  }
 
   res.status(201).json({
     set: {
       ...newSet,
-      pairs: newPairs,
+      pairs: newPairs || [],
     },
   });
 });
 
-app.put("/api/admin/sets/:id", requireAuth, (req, res) => {
+app.put("/api/admin/sets/:id", requireAuth, async (req, res) => {
   const { id } = req.params;
   const { title, description, instructions, isActive, pairs, slug: customSlug } = req.body;
 
-  const setIndex = db.card_sets.findIndex(s => s.id === id);
-  if (setIndex === -1) {
+  const { data: existingSet } = await supabase
+    .from("card_sets")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!existingSet) {
     return res.status(404).json({ error: "Kaartenset niet gevonden." });
   }
 
@@ -927,97 +533,157 @@ app.put("/api/admin/sets/:id", requireAuth, (req, res) => {
     }
   }
 
-  let slug = customSlug ? generateSlug(customSlug) : db.card_sets[setIndex].slug;
+  let slug = customSlug ? generateSlug(customSlug) : existingSet.slug;
   if (!slug) slug = generateSlug(title);
 
-  // Check if another set has this slug
   let originalSlug = slug;
   let counter = 1;
-  while (db.card_sets.some(s => s.id !== id && s.slug === slug)) {
-    slug = `${originalSlug}-${counter}`;
+  let checkSlug = slug;
+  for (;;) {
+    const { data: conflict } = await supabase
+      .from("card_sets")
+      .select("id, slug")
+      .eq("slug", checkSlug)
+      .neq("id", id)
+      .maybeSingle();
+    if (!conflict) break;
+    checkSlug = `${originalSlug}-${counter}`;
     counter++;
   }
+  slug = checkSlug;
 
   const now = new Date().toISOString();
-  db.card_sets[setIndex] = {
-    ...db.card_sets[setIndex],
-    title: title.trim(),
-    description: (description || "").trim(),
-    instructions: (instructions || "").trim(),
-    slug,
-    is_active: isActive !== false,
-    updated_at: now,
-  };
 
-  // Replace pairs for this set
-  db.card_pairs = db.card_pairs.filter(p => p.set_id !== id);
-  const newPairs: StoredCardPair[] = pairs.map((p: any, idx: number) => ({
-    id: p.id && !p.id.startsWith("temp-") ? p.id : crypto.randomUUID(),
+  const { data: updatedSet, error: setError } = await supabase
+    .from("card_sets")
+    .update({
+      title: title.trim(),
+      description: (description || "").trim(),
+      instructions: (instructions || "").trim(),
+      slug,
+      is_active: isActive !== false,
+      updated_at: now,
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (setError) {
+    return res.status(500).json({ error: "Kon kaartenset niet bijwerken." });
+  }
+
+  await supabase.from("card_pairs").delete().eq("set_id", id);
+
+  const now2 = new Date().toISOString();
+  const pairRows = pairs.map((p: any, idx: number) => ({
+    id: (p.id && !p.id.startsWith("temp-")) ? p.id : crypto.randomUUID(),
     set_id: id,
     card_a_text: p.cardAText.trim(),
     card_b_text: p.cardBText.trim(),
-    card_a_image_url: p.cardAImageUrl?.trim() || undefined,
-    card_b_image_url: p.cardBImageUrl?.trim() || undefined,
+    card_a_image_url: p.cardAImageUrl?.trim() || null,
+    card_b_image_url: p.cardBImageUrl?.trim() || null,
     sort_order: typeof p.sortOrder === "number" ? p.sortOrder : idx + 1,
-    created_at: p.createdAt || now,
-    updated_at: now,
+    created_at: p.createdAt || now2,
+    updated_at: now2,
   }));
 
-  db.card_pairs.push(...newPairs);
-  saveDatabase();
+  const { data: newPairs, error: pairsError } = await supabase
+    .from("card_pairs")
+    .insert(pairRows)
+    .select();
+
+  if (pairsError) {
+    return res.status(500).json({ error: "Kon kaartparen niet opslaan." });
+  }
 
   res.json({
     set: {
-      ...db.card_sets[setIndex],
-      pairs: newPairs,
+      ...updatedSet,
+      pairs: newPairs || [],
     },
   });
 });
 
-app.delete("/api/admin/sets/:id", requireAuth, (req, res) => {
+app.delete("/api/admin/sets/:id", requireAuth, async (req, res) => {
   const { id } = req.params;
-  const setIndex = db.card_sets.findIndex(s => s.id === id);
-  if (setIndex === -1) {
+
+  const { data: set } = await supabase
+    .from("card_sets")
+    .select("id")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!set) {
     return res.status(404).json({ error: "Kaartenset niet gevonden." });
   }
 
-  db.card_sets.splice(setIndex, 1);
-  db.card_pairs = db.card_pairs.filter(p => p.set_id !== id);
-  saveDatabase();
+  await supabase.from("card_pairs").delete().eq("set_id", id);
+  const { error } = await supabase.from("card_sets").delete().eq("id", id);
+
+  if (error) {
+    return res.status(500).json({ error: "Kon kaartenset niet verwijderen." });
+  }
 
   res.json({ success: true, message: "Kaartenset verwijderd." });
 });
 
-app.post("/api/admin/sets/:id/duplicate", requireAuth, (req, res) => {
+app.post("/api/admin/sets/:id/duplicate", requireAuth, async (req, res) => {
   const { id } = req.params;
-  const originalSet = db.card_sets.find(s => s.id === id);
+
+  const { data: originalSet } = await supabase
+    .from("card_sets")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
   if (!originalSet) {
     return res.status(404).json({ error: "Kaartenset niet gevonden." });
   }
 
-  const originalPairs = db.card_pairs.filter(p => p.set_id === id);
+  const { data: originalPairs } = await supabase
+    .from("card_pairs")
+    .select("*")
+    .eq("set_id", id)
+    .order("sort_order", { ascending: true });
+
   const newSetId = crypto.randomUUID();
   const now = new Date().toISOString();
 
   let newSlug = `${originalSet.slug}-kopie`;
   let counter = 1;
-  while (db.card_sets.some(s => s.slug === newSlug)) {
-    newSlug = `${originalSet.slug}-kopie-${counter}`;
+  let checkSlug = newSlug;
+  for (;;) {
+    const { data: conflict } = await supabase
+      .from("card_sets")
+      .select("slug")
+      .eq("slug", checkSlug)
+      .maybeSingle();
+    if (!conflict) break;
+    checkSlug = `${originalSet.slug}-kopie-${counter}`;
     counter++;
   }
+  newSlug = checkSlug;
 
-  const duplicatedSet: StoredCardSet = {
-    id: newSetId,
-    title: `${originalSet.title} (Kopie)`,
-    description: originalSet.description,
-    instructions: originalSet.instructions,
-    slug: newSlug,
-    is_active: false, // Default newly duplicated sets to inactive so docent can review
-    created_at: now,
-    updated_at: now,
-  };
+  const { data: duplicatedSet, error: setError } = await supabase
+    .from("card_sets")
+    .insert({
+      id: newSetId,
+      title: `${originalSet.title} (Kopie)`,
+      description: originalSet.description,
+      instructions: originalSet.instructions,
+      slug: newSlug,
+      is_active: false,
+      created_at: now,
+      updated_at: now,
+    })
+    .select()
+    .single();
 
-  const duplicatedPairs: StoredCardPair[] = originalPairs.map(p => ({
+  if (setError) {
+    return res.status(500).json({ error: "Kon kaartenset niet dupliceren." });
+  }
+
+  const duplicatedPairs = (originalPairs || []).map(p => ({
     id: crypto.randomUUID(),
     set_id: newSetId,
     card_a_text: p.card_a_text,
@@ -1029,30 +695,48 @@ app.post("/api/admin/sets/:id/duplicate", requireAuth, (req, res) => {
     updated_at: now,
   }));
 
-  db.card_sets.push(duplicatedSet);
-  db.card_pairs.push(...duplicatedPairs);
-  saveDatabase();
+  const { data: insertedPairs } = await supabase
+    .from("card_pairs")
+    .insert(duplicatedPairs)
+    .select();
 
   res.status(201).json({
     set: {
       ...duplicatedSet,
-      pairs: duplicatedPairs,
+      pairs: insertedPairs || [],
     },
   });
 });
 
-app.patch("/api/admin/sets/:id/toggle-active", requireAuth, (req, res) => {
+app.patch("/api/admin/sets/:id/toggle-active", requireAuth, async (req, res) => {
   const { id } = req.params;
-  const set = db.card_sets.find(s => s.id === id);
+
+  const { data: set } = await supabase
+    .from("card_sets")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
   if (!set) {
     return res.status(404).json({ error: "Kaartenset niet gevonden." });
   }
 
-  set.is_active = !set.is_active;
-  set.updated_at = new Date().toISOString();
-  saveDatabase();
+  const now = new Date().toISOString();
+  const { data: updated, error } = await supabase
+    .from("card_sets")
+    .update({
+      is_active: !set.is_active,
+      updated_at: now,
+    })
+    .eq("id", id)
+    .select()
+    .single();
 
-  res.json({ success: true, isActive: set.is_active });
+  if (error) {
+    return res.status(500).json({ error: "Kon status niet wijzigen." });
+  }
+
+  res.json({ success: true, isActive: updated.is_active });
 });
 
 // ----------------------------------------------------
@@ -1068,7 +752,6 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    // SPA fallback: serve index.html for any non-API route
     app.get(/^\/(?!api\/).*/, (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
