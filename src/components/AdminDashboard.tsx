@@ -376,6 +376,7 @@ export const AdminDashboard: FC<AdminDashboardProps> = ({
       <ChangePasswordModal
         isOpen={passwordModalOpen}
         onClose={() => setPasswordModalOpen(false)}
+        adminEmail={adminUser.email}
       />
     </div>
   );

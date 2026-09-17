@@ -5,11 +5,13 @@ import { changeAdminPassword } from "../lib/api";
 interface ChangePasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
+  adminEmail?: string;
 }
 
 export const ChangePasswordModal: FC<ChangePasswordModalProps> = ({
   isOpen,
   onClose,
+  adminEmail,
 }) => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -38,7 +40,7 @@ export const ChangePasswordModal: FC<ChangePasswordModalProps> = ({
     setIsLoading(true);
 
     try {
-      await changeAdminPassword(currentPassword, newPassword);
+      await changeAdminPassword(currentPassword, newPassword, adminEmail);
       setSuccessMessage("Wachtwoord succesvol gewijzigd!");
       setCurrentPassword("");
       setNewPassword("");
