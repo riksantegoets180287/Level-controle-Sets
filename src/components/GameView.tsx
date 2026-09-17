@@ -19,12 +19,30 @@ function shuffleArray<T>(array: T[]): T[] {
   return arr;
 }
 
-// Gentle pleasant chime synthesizer
+// Gentle pleasant chime synthesizer — reuses a single AudioContext
+// to avoid hitting the browser's concurrent AudioContext limit (~6),
+// which would freeze click handling after several pairings.
+let _audioCtx: AudioContext | null = null;
+function getAudioCtx(): AudioContext | null {
+  try {
+    if (!_audioCtx) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return null;
+      _audioCtx = new AudioCtx();
+    }
+    if (_audioCtx.state === "suspended") {
+      _audioCtx.resume();
+    }
+    return _audioCtx;
+  } catch {
+    return null;
+  }
+}
+
 function playPairChime(isHigh = false) {
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
+    const ctx = getAudioCtx();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = "sine";
