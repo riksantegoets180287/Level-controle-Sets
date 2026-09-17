@@ -62,7 +62,7 @@ export default function App() {
         setCurrentView("game");
 
         if (pushHistory) {
-          const targetPath = `/set/${set.slug}`;
+          const targetPath = withBasePath(`/set/${set.slug}`);
           if (window.location.pathname !== targetPath) {
             window.history.pushState({ view: "game", slug: set.slug }, "", targetPath);
           }

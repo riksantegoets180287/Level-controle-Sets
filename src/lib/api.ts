@@ -1,4 +1,5 @@
 import { CardSet } from "../types";
+import { withBasePath } from "./basePath";
 
 const TOKEN_KEY = "summa_admin_token";
 
@@ -26,7 +27,7 @@ function getAuthHeaders(): HeadersInit {
 }
 
 export async function fetchCardSets(): Promise<CardSet[]> {
-  const res = await fetch("/api/sets", {
+  const res = await fetch(withBasePath("/api/sets"), {
     headers: getAuthHeaders(),
   });
   if (!res.ok) {
@@ -37,7 +38,7 @@ export async function fetchCardSets(): Promise<CardSet[]> {
 }
 
 export async function fetchCardSetBySlug(slugOrId: string): Promise<CardSet> {
-  const res = await fetch(`/api/sets/${encodeURIComponent(slugOrId)}`, {
+  const res = await fetch(withBasePath(`/api/sets/${encodeURIComponent(slugOrId)}`), {
     headers: getAuthHeaders(),
   });
   if (!res.ok) {
@@ -51,7 +52,7 @@ export async function fetchCardSetBySlug(slugOrId: string): Promise<CardSet> {
 }
 
 export async function adminLogin(email: string, password: string) {
-  const res = await fetch("/api/auth/login", {
+  const res = await fetch(withBasePath("/api/auth/login"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -67,7 +68,7 @@ export async function adminLogin(email: string, password: string) {
 }
 
 export async function quickAdminLogin() {
-  const res = await fetch("/api/auth/quick-login", {
+  const res = await fetch(withBasePath("/api/auth/quick-login"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
   });
@@ -86,7 +87,7 @@ export async function checkAdminSession() {
   if (!token) return null;
 
   try {
-    const res = await fetch("/api/auth/me", {
+    const res = await fetch(withBasePath("/api/auth/me"), {
       headers: getAuthHeaders(),
     });
     if (!res.ok) {
@@ -102,7 +103,7 @@ export async function checkAdminSession() {
 
 export async function adminLogout() {
   try {
-    await fetch("/api/auth/logout", {
+    await fetch(withBasePath("/api/auth/logout"), {
       method: "POST",
       headers: getAuthHeaders(),
     });
@@ -112,7 +113,7 @@ export async function adminLogout() {
 }
 
 export async function changeAdminPassword(currentPassword: string, newPassword: string) {
-  const res = await fetch("/api/auth/change-password", {
+  const res = await fetch(withBasePath("/api/auth/change-password"), {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ currentPassword, newPassword }),
@@ -126,7 +127,7 @@ export async function changeAdminPassword(currentPassword: string, newPassword: 
 }
 
 export async function createCardSet(setPayload: any) {
-  const res = await fetch("/api/admin/sets", {
+  const res = await fetch(withBasePath("/api/admin/sets"), {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(setPayload),
@@ -140,7 +141,7 @@ export async function createCardSet(setPayload: any) {
 }
 
 export async function updateCardSet(id: string, setPayload: any) {
-  const res = await fetch(`/api/admin/sets/${id}`, {
+  const res = await fetch(withBasePath(`/api/admin/sets/${id}`), {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify(setPayload),
@@ -154,7 +155,7 @@ export async function updateCardSet(id: string, setPayload: any) {
 }
 
 export async function deleteCardSet(id: string) {
-  const res = await fetch(`/api/admin/sets/${id}`, {
+  const res = await fetch(withBasePath(`/api/admin/sets/${id}`), {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
@@ -167,7 +168,7 @@ export async function deleteCardSet(id: string) {
 }
 
 export async function duplicateCardSet(id: string) {
-  const res = await fetch(`/api/admin/sets/${id}/duplicate`, {
+  const res = await fetch(withBasePath(`/api/admin/sets/${id}/duplicate`), {
     method: "POST",
     headers: getAuthHeaders(),
   });
@@ -180,7 +181,7 @@ export async function duplicateCardSet(id: string) {
 }
 
 export async function toggleSetStatus(id: string) {
-  const res = await fetch(`/api/admin/sets/${id}/toggle-active`, {
+  const res = await fetch(withBasePath(`/api/admin/sets/${id}/toggle-active`), {
     method: "PATCH",
     headers: getAuthHeaders(),
   });

@@ -130,9 +130,10 @@ function requireAuth(req: express.Request, res: express.Response, next: express.
 // ----------------------------------------------------
 // API Routes
 // ----------------------------------------------------
+const apiRouter = express.Router();
 
 // Auth routes
-app.post("/api/auth/quick-login", async (req, res) => {
+apiRouter.post("/api/auth/quick-login", async (req, res) => {
   const { data: users } = await supabase
     .from("admin_users")
     .select("*")
@@ -170,7 +171,7 @@ app.post("/api/auth/quick-login", async (req, res) => {
   });
 });
 
-app.post("/api/auth/login", async (req, res) => {
+apiRouter.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: "Vul een e-mailadres en wachtwoord in." });
@@ -244,7 +245,7 @@ app.post("/api/auth/login", async (req, res) => {
   });
 });
 
-app.get("/api/auth/me", requireAuth, (req, res) => {
+apiRouter.get("/api/auth/me", requireAuth, (req, res) => {
   const user = (req as any).user;
   res.json({
     user: {
@@ -254,7 +255,7 @@ app.get("/api/auth/me", requireAuth, (req, res) => {
   });
 });
 
-app.post("/api/auth/logout", requireAuth, (req, res) => {
+apiRouter.post("/api/auth/logout", requireAuth, (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (token) {
     activeSessions.delete(token);
@@ -263,7 +264,7 @@ app.post("/api/auth/logout", requireAuth, (req, res) => {
   res.json({ success: true });
 });
 
-app.post("/api/auth/change-password", requireAuth, async (req, res) => {
+apiRouter.post("/api/auth/change-password", requireAuth, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   const userSession = (req as any).user;
 
@@ -307,7 +308,7 @@ app.post("/api/auth/change-password", requireAuth, async (req, res) => {
 });
 
 // Card Sets Public routes
-app.get("/api/sets", async (req, res) => {
+apiRouter.get("/api/sets", async (req, res) => {
   const authHeader = req.headers.authorization;
   let isAdmin = false;
   if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -352,7 +353,7 @@ app.get("/api/sets", async (req, res) => {
   res.json({ sets: result });
 });
 
-app.get("/api/sets/:slugOrId", async (req, res) => {
+apiRouter.get("/api/sets/:slugOrId", async (req, res) => {
   const { slugOrId } = req.params;
 
   const { data: set, error } = await supabase
@@ -404,7 +405,7 @@ app.get("/api/sets/:slugOrId", async (req, res) => {
 });
 
 // Admin Card Set Management Routes
-app.post("/api/admin/sets", requireAuth, async (req, res) => {
+apiRouter.post("/api/admin/sets", requireAuth, async (req, res) => {
   const { title, description, instructions, isActive, pairs, slug: customSlug } = req.body;
 
   if (!title || !title.trim()) {
@@ -500,7 +501,7 @@ app.post("/api/admin/sets", requireAuth, async (req, res) => {
   });
 });
 
-app.put("/api/admin/sets/:id", requireAuth, async (req, res) => {
+apiRouter.put("/api/admin/sets/:id", requireAuth, async (req, res) => {
   const { id } = req.params;
   const { title, description, instructions, isActive, pairs, slug: customSlug } = req.body;
 
@@ -602,7 +603,7 @@ app.put("/api/admin/sets/:id", requireAuth, async (req, res) => {
   });
 });
 
-app.delete("/api/admin/sets/:id", requireAuth, async (req, res) => {
+apiRouter.delete("/api/admin/sets/:id", requireAuth, async (req, res) => {
   const { id } = req.params;
 
   const { data: set } = await supabase
@@ -625,7 +626,7 @@ app.delete("/api/admin/sets/:id", requireAuth, async (req, res) => {
   res.json({ success: true, message: "Kaartenset verwijderd." });
 });
 
-app.post("/api/admin/sets/:id/duplicate", requireAuth, async (req, res) => {
+apiRouter.post("/api/admin/sets/:id/duplicate", requireAuth, async (req, res) => {
   const { id } = req.params;
 
   const { data: originalSet } = await supabase
@@ -706,7 +707,7 @@ app.post("/api/admin/sets/:id/duplicate", requireAuth, async (req, res) => {
   });
 });
 
-app.patch("/api/admin/sets/:id/toggle-active", requireAuth, async (req, res) => {
+apiRouter.patch("/api/admin/sets/:id/toggle-active", requireAuth, async (req, res) => {
   const { id } = req.params;
 
   const { data: set } = await supabase
@@ -737,9 +738,15 @@ app.patch("/api/admin/sets/:id/toggle-active", requireAuth, async (req, res) => 
   res.json({ success: true, isActive: updated.is_active });
 });
 
+// Mount API router at both root and base path so it works in dev and production
+app.use(apiRouter);
+app.use(BASE_PATH, apiRouter);
+
 // ----------------------------------------------------
 // Vite and Static Serving
 // ----------------------------------------------------
+const BASE_PATH = "/leveleinde";
+
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -749,9 +756,18 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get(/^\/(?!api\/).*/, (req, res) => {
+
+    // Serve static assets (JS, CSS, images) from /leveleinde/assets/ etc.
+    app.use(`${BASE_PATH}`, express.static(distPath));
+
+    // SPA fallback: any non-API path under /leveleinde serves index.html
+    app.get(new RegExp(`^${BASE_PATH}/(?!api/).*`), (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
+    });
+
+    // Redirect bare /leveleinde to /leveleinde/
+    app.get(`${BASE_PATH}`, (req, res) => {
+      res.redirect(301, `${BASE_PATH}/`);
     });
   }
 

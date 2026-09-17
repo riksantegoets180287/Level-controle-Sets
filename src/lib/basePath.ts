@@ -1,4 +1,4 @@
-const BASE_PATH = "/levelcontrole";
+const BASE_PATH = "/leveleinde";
 
 export function getBasePath(): string {
   return BASE_PATH;
