@@ -13,7 +13,7 @@ export const AdminLogin: FC<AdminLoginProps> = ({
   onBackToHome,
 }) => {
   const [email, setEmail] = useState("digitalevaardigheden@summacollege.nl");
-  const [password, setPassword] = useState("Summa2025!");
+  const [password, setPassword] = useState("OG7~55(5u1in");
   const [isLoading, setIsLoading] = useState(false);
   const [isQuickLoading, setIsQuickLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

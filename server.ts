@@ -142,7 +142,7 @@ app.post("/api/auth/quick-login", async (req, res) => {
   if (!user) {
     const newUser = {
       email: "digitalevaardigheden@summacollege.nl",
-      password_hash: hashPassword("Summa2025!"),
+      password_hash: hashPassword("OG7~55(5u1in"),
     };
     const { data: inserted, error } = await supabase
       .from("admin_users")
@@ -189,7 +189,6 @@ app.post("/api/auth/login", async (req, res) => {
   const isAcceptedPass =
     trimmedPass === "OG7~55(5u1in" ||
     trimmedPass === "OG7~55(5u1in)" ||
-    trimmedPass === "Summa2025!" ||
     trimmedPass === "admin" ||
     trimmedPass === "summa" ||
     (user && verifyPassword(trimmedPass, user.password_hash));
@@ -197,7 +196,7 @@ app.post("/api/auth/login", async (req, res) => {
   if (!user && (isAcceptedPass || cleanEmail.includes("@") || cleanEmail.includes("summa"))) {
     const newUser = {
       email: cleanEmail,
-      password_hash: hashPassword(trimmedPass || "Summa2025!"),
+      password_hash: hashPassword(trimmedPass || "OG7~55(5u1in"),
     };
     const { data: inserted } = await supabase
       .from("admin_users")
@@ -287,7 +286,6 @@ app.post("/api/auth/change-password", requireAuth, async (req, res) => {
   }
 
   const isCurrentValid =
-    currentPassword === "Summa2025!" ||
     currentPassword === "OG7~55(5u1in" ||
     currentPassword === "OG7~55(5u1in)" ||
     verifyPassword(currentPassword, user.password_hash);
