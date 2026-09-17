@@ -1,12 +1,12 @@
 import { FC, useState, useEffect, DragEvent, useMemo } from "react";
-import { RotateCcw, Undo2, CheckCheck, TriangleAlert as AlertTriangle, Clock, Link2, ArrowLeft, Sparkles, Circle as HelpCircle, X, Layers } from "lucide-react";
+import { RotateCcw, Undo2, CheckCheck, TriangleAlert as AlertTriangle, Clock, Link2, Sparkles, Circle as HelpCircle, X, Layers } from "lucide-react";
 import { CardSet, PlayableCard, ConnectedPair, GameResult } from "../types";
 import { ResultsModal } from "./ResultsModal";
 import { fireSuccessConfetti } from "../lib/confetti";
 
 interface GameViewProps {
   cardSet: CardSet;
-  onBackToHome: () => void;
+  onBackToHome?: () => void;
 }
 
 // Utility to shuffle an array
@@ -360,16 +360,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
         <div className="flex flex-wrap items-center justify-between gap-2">
           {/* Left: Navigation and Title (only title, no description) */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              id="btn-back-overview"
-              onClick={onBackToHome}
-              title="Terug naar overzicht"
-              className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 text-slate-600" />
-              <span className="hidden sm:inline">Overzicht</span>
-            </button>
-
             <div>
               <h1 className="font-black text-[#002B49] text-sm sm:text-base tracking-tight leading-tight">
                 {cardSet.title}

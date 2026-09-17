@@ -12,8 +12,8 @@ export const AdminLogin: FC<AdminLoginProps> = ({
   onLoginSuccess,
   onBackToHome,
 }) => {
-  const [email, setEmail] = useState("digitalevaardigheden@summacollege.nl");
-  const [password, setPassword] = useState("OG7~55(5u1in");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isQuickLoading, setIsQuickLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

@@ -11,7 +11,7 @@ import {
   checkAdminSession,
   adminLogout,
 } from "./lib/api";
-import { CircleAlert as AlertCircle, ArrowLeft } from "lucide-react";
+import { CircleAlert as AlertCircle } from "lucide-react";
 import { withBasePath, stripBasePath } from "./lib/basePath";
 
 export default function App() {
@@ -25,7 +25,7 @@ export default function App() {
   const [isLoadingGame, setIsLoadingGame] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Load active card sets
+  // Load all card sets (for admin dashboard)
   const loadSets = useCallback(async () => {
     try {
       setIsLoadingSets(true);
@@ -104,7 +104,7 @@ export default function App() {
         return;
       }
 
-      // Default home
+      // Default home — only show overview to logged-in admins
       setCurrentView("home");
       setActiveSet(null);
     };
@@ -140,7 +140,7 @@ export default function App() {
   const handleLoginSuccess = (user: AdminUser) => {
     setAdminUser(user);
     setCurrentView("admin-dashboard");
-    loadSets(); // Refresh to include inactive sets if any
+    loadSets();
   };
 
   const handleLogout = async () => {
@@ -150,6 +150,9 @@ export default function App() {
     loadSets();
   };
 
+  // Students accessing the root URL without being logged in see a simple landing
+  const showStudentLanding = currentView === "home" && !adminUser;
+
   return (
     <div
       className={`bg-[#F4F7FB] text-slate-800 selection:bg-blue-100 selection:text-blue-900 ${
@@ -158,8 +161,8 @@ export default function App() {
           : "min-h-screen flex flex-col"
       }`}
     >
-      {/* Top Navigation - shown on home and admin */}
-      {currentView !== "game" && (
+      {/* Top Navigation - shown on home (admin) and admin views, NOT on game */}
+      {currentView !== "game" && !showStudentLanding && (
         <Navbar
           currentView={currentView}
           onNavigateHome={handleNavigateHome}
@@ -169,9 +172,7 @@ export default function App() {
         />
       )}
 
-      {/* Main Container */}
       <main className={`flex-1 ${currentView === "game" ? "h-full overflow-hidden flex flex-col" : ""}`}>
-        {/* Global Error Banner */}
         {errorMessage && (
           <div className="max-w-4xl mx-auto mt-6 px-4">
             <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-start justify-between gap-3 shadow-xs">
@@ -192,7 +193,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Global Loading Spinner for game */}
         {isLoadingGame && (
           <div className="py-24 text-center flex flex-col items-center justify-center">
             <div className="w-12 h-12 rounded-full border-4 border-slate-200 border-t-[#0066B3] animate-spin mb-4"></div>
@@ -200,10 +200,34 @@ export default function App() {
           </div>
         )}
 
-        {/* Views */}
         {!isLoadingGame && (
           <>
-            {currentView === "home" && (
+            {/* Student landing page — no overview visible */}
+            {showStudentLanding && (
+              <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
+                <div className="bg-white rounded-3xl p-8 sm:p-10 max-w-lg w-full border border-slate-200 shadow-xl text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#002B49] to-[#0066B3] text-white flex items-center justify-center mx-auto mb-4 shadow-md shadow-blue-900/20">
+                    <span className="font-black text-2xl tracking-tighter">S<span className="text-[#E4007C] text-sm">•</span></span>
+                  </div>
+                  <h1 className="text-2xl font-black text-[#002B49] mb-2">
+                    Summa College Koppelspel
+                  </h1>
+                  <p className="text-sm text-slate-500 mb-6">
+                    Je hebt geen directe link naar een koppelspel gekregen.
+                    Vraag je docent om de juiste link via het digitale leerplatform (DLO).
+                  </p>
+                  <button
+                    onClick={handleNavigateAdmin}
+                    className="text-xs font-bold text-slate-400 hover:text-[#0066B3] transition-colors cursor-pointer"
+                  >
+                    Docent inloggen
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Admin home (overview) — only for logged-in admins */}
+            {currentView === "home" && adminUser && (
               <HomeView
                 cardSets={cardSets}
                 isLoading={isLoadingSets}
@@ -239,8 +263,8 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer (hidden in game view for strict no scroll requirement) */}
-      {currentView !== "game" && (
+      {/* Footer — hidden in game view and student landing */}
+      {currentView !== "game" && !showStudentLanding && (
         <footer className="mt-auto border-t border-slate-200 bg-white/80 py-6 text-center text-xs text-slate-500">
           <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
