@@ -19,44 +19,6 @@ function shuffleArray<T>(array: T[]): T[] {
   return arr;
 }
 
-// Gentle pleasant chime synthesizer — reuses a single AudioContext
-// to avoid hitting the browser's concurrent AudioContext limit (~6),
-// which would freeze click handling after several pairings.
-let _audioCtx: AudioContext | null = null;
-function getAudioCtx(): AudioContext | null {
-  try {
-    if (!_audioCtx) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return null;
-      _audioCtx = new AudioCtx();
-    }
-    if (_audioCtx.state === "suspended") {
-      _audioCtx.resume();
-    }
-    return _audioCtx;
-  } catch {
-    return null;
-  }
-}
-
-function playPairChime(isHigh = false) {
-  try {
-    const ctx = getAudioCtx();
-    if (!ctx) return;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(isHigh ? 659.25 : 523.25, ctx.currentTime);
-    gain.gain.setValueAtTime(0.06, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.25);
-  } catch {
-    // Ignore audio if restricted in sandbox
-  }
-}
 
 export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
   const [allCards, setAllCards] = useState<PlayableCard[]>([]);
@@ -186,7 +148,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     setSelectedCardUid(null);
     setDraggedCardUid(null);
     setDragOverCardUid(null);
-    playPairChime(true);
   };
 
   // Click handler
@@ -197,7 +158,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
       setConnectedPairs((prev) => prev.filter((p) => p.id !== existing.pair.id));
       setSelectedCardUid(null);
       showNotice("Kaartenpaar ontkoppeld.");
-      playPairChime(false);
       return;
     }
 
