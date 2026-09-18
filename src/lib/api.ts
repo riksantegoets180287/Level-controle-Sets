@@ -141,10 +141,12 @@ function generateSlug(text: string): string {
 
 export async function createCardSet(setPayload: any) {
   const slug = setPayload.slug || generateSlug(setPayload.title);
+  const newId = crypto.randomUUID();
 
   const { data: setData, error: setError } = await supabase
     .from("card_sets")
     .insert({
+      id: newId,
       title: setPayload.title,
       description: setPayload.description,
       instructions: setPayload.instructions,
@@ -272,9 +274,11 @@ export async function duplicateCardSet(id: string) {
   const newSlug = `${set.slug}-kopie`;
 
   // Create the duplicate set
+  const newSetId = crypto.randomUUID();
   const { data: newSet, error: insertError } = await supabase
     .from("card_sets")
     .insert({
+      id: newSetId,
       title: `${set.title} (Kopie)`,
       description: set.description,
       instructions: set.instructions,
