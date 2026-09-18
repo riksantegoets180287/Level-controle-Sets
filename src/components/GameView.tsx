@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, DragEvent, useMemo } from "react";
+import { FC, useState, useEffect, useRef, DragEvent, useMemo } from "react";
 import { RotateCcw, Undo2, CheckCheck, TriangleAlert as AlertTriangle, Clock, Link2, Sparkles, Circle as HelpCircle, X, Layers } from "lucide-react";
 import { CardSet, PlayableCard, ConnectedPair, GameResult } from "../types";
 import { ResultsModal } from "./ResultsModal";
@@ -28,6 +28,12 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
   const [dragOverCardUid, setDragOverCardUid] = useState<string | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
   const [isWideScreen, setIsWideScreen] = useState(() => window.innerWidth >= 768);
+
+  // Guard against the browser firing a click event right after a drag ends,
+  // and against rapid double-triggering of pair logic.
+  const justDraggedRef = useRef(false);
+  const dragStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  const isDraggingRef = useRef(false);
 
   // Instruction popup at start
   const [showIntroModal, setShowIntroModal] = useState(true);
@@ -107,6 +113,9 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     setDragOverCardUid(null);
     setGameResult(null);
     setTimerSeconds(0);
+    justDraggedRef.current = false;
+    isDraggingRef.current = false;
+    dragStartPosRef.current = null;
   };
 
   useEffect(() => {
@@ -127,10 +136,10 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
   const isFullyConnected =
     totalTargetPairs > 0 && connectedPairs.length === totalTargetPairs;
 
-  // Handler to pair two cards
+  // Handler to pair two cards — uses functional state check to prevent
+  // double-pairing from race conditions (drag+click firing simultaneously).
   const pairCards = (card1: PlayableCard, card2: PlayableCard) => {
     if (card1.uid === card2.uid) return;
-    if (cardPairMap.has(card1.uid) || cardPairMap.has(card2.uid)) return;
 
     // Both cards must be of different sides (1 Green, 1 Blue)
     if (card1.side === card2.side) {
@@ -138,20 +147,37 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
       return;
     }
 
-    const newPair: ConnectedPair = {
-      id: `connected-${Date.now()}-${Math.random()}`,
-      card1,
-      card2,
-    };
+    setConnectedPairs((prev) => {
+      // Re-check against the latest state to prevent double-pairing
+      const isAlreadyPaired = prev.some(
+        (cp) =>
+          cp.card1.uid === card1.uid ||
+          cp.card2.uid === card1.uid ||
+          cp.card1.uid === card2.uid ||
+          cp.card2.uid === card2.uid
+      );
+      if (isAlreadyPaired) return prev;
 
-    setConnectedPairs((prev) => [...prev, newPair]);
+      const newPair: ConnectedPair = {
+        id: `connected-${Date.now()}-${Math.random()}`,
+        card1,
+        card2,
+      };
+      return [...prev, newPair];
+    });
     setSelectedCardUid(null);
     setDraggedCardUid(null);
     setDragOverCardUid(null);
   };
 
-  // Click handler
+  // Click handler — ignores clicks that are actually the tail end of a drag
   const handleCardClick = (card: PlayableCard) => {
+    // Suppress the phantom click that browsers fire right after a drag ends
+    if (justDraggedRef.current) {
+      justDraggedRef.current = false;
+      return;
+    }
+
     // If clicking an already paired (gray) card, uncouple it
     const existing = cardPairMap.get(card.uid);
     if (existing) {
@@ -200,6 +226,8 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
       e.preventDefault();
       return;
     }
+    isDraggingRef.current = true;
+    dragStartPosRef.current = { x: e.clientX, y: e.clientY };
     setDraggedCardUid(card.uid);
     e.dataTransfer.setData("text/plain", card.uid);
     e.dataTransfer.effectAllowed = "move";
@@ -221,7 +249,10 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     e.preventDefault();
     setDragOverCardUid(null);
     const sourceUid = e.dataTransfer.getData("text/plain") || draggedCardUid;
-    if (!sourceUid || sourceUid === targetCard.uid) return;
+    if (!sourceUid || sourceUid === targetCard.uid) {
+      setDraggedCardUid(null);
+      return;
+    }
 
     const sourceCard = allCards.find((c) => c.uid === sourceUid);
     if (
@@ -231,10 +262,16 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     ) {
       pairCards(sourceCard, targetCard);
     }
+    isDraggingRef.current = false;
+    justDraggedRef.current = true;
     setDraggedCardUid(null);
   };
 
   const handleDragEnd = () => {
+    if (isDraggingRef.current) {
+      justDraggedRef.current = true;
+    }
+    isDraggingRef.current = false;
     setDraggedCardUid(null);
     setDragOverCardUid(null);
   };
