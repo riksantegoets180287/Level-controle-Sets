@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useRef, DragEvent, useMemo } from "react";
+import { FC, useState, useEffect, useRef, useMemo, PointerEvent as ReactPointerEvent } from "react";
 import { RotateCcw, Undo2, CheckCheck, TriangleAlert as AlertTriangle, Clock, Link2, Sparkles, Circle as HelpCircle, X, Layers } from "lucide-react";
 import { CardSet, PlayableCard, ConnectedPair, GameResult } from "../types";
 import { ResultsModal } from "./ResultsModal";
@@ -9,7 +9,6 @@ interface GameViewProps {
   onBackToHome?: () => void;
 }
 
-// Utility to shuffle an array
 function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -19,49 +18,39 @@ function shuffleArray<T>(array: T[]): T[] {
   return arr;
 }
 
+const DRAG_THRESHOLD = 8;
 
 export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
   const [allCards, setAllCards] = useState<PlayableCard[]>([]);
   const [connectedPairs, setConnectedPairs] = useState<ConnectedPair[]>([]);
   const [selectedCardUid, setSelectedCardUid] = useState<string | null>(null);
-  const [draggedCardUid, setDraggedCardUid] = useState<string | null>(null);
   const [dragOverCardUid, setDragOverCardUid] = useState<string | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
   const [isWideScreen, setIsWideScreen] = useState(() => window.innerWidth >= 768);
 
-  // Guard against the browser firing a click event right after a drag ends,
-  // and against rapid double-triggering of pair logic.
-  const justDraggedRef = useRef(false);
-  const dragStartPosRef = useRef<{ x: number; y: number } | null>(null);
-  const isDraggingRef = useRef(false);
+  // Pointer-based drag state (replaces unreliable HTML5 drag-and-drop)
+  const pointerStateRef = useRef<{
+    card: PlayableCard;
+    startX: number;
+    startY: number;
+    moved: boolean;
+  } | null>(null);
+  const [draggedCardUid, setDraggedCardUid] = useState<string | null>(null);
 
-  // Instruction popup at start
   const [showIntroModal, setShowIntroModal] = useState(true);
-
-  // Timer state
   const [timerSeconds, setTimerSeconds] = useState(0);
-
-  // Restart modal
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
-
-  // Result state
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
 
-  // Window resize listener to keep grid proportions responsive without scrolling
   useEffect(() => {
-    const handleResize = () => {
-      setIsWideScreen(window.innerWidth >= 768);
-    };
+    const handleResize = () => setIsWideScreen(window.innerWidth >= 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Timer counter
   useEffect(() => {
     if (gameResult || showIntroModal) return;
-    const timer = setInterval(() => {
-      setTimerSeconds((s) => s + 1);
-    }, 1000);
+    const timer = setInterval(() => setTimerSeconds((s) => s + 1), 1000);
     return () => clearInterval(timer);
   }, [gameResult, showIntroModal]);
 
@@ -71,7 +60,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Helper for feedback toast
   const showNotice = (msg: string) => {
     setFeedbackNotice(msg);
     setTimeout(() => {
@@ -79,13 +67,11 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     }, 3000);
   };
 
-  // Initialize or reset game
   const initGame = () => {
     if (!cardSet.pairs || cardSet.pairs.length === 0) return;
 
     const cards: PlayableCard[] = [];
     cardSet.pairs.forEach((p) => {
-      // Side A = Groen
       cards.push({
         uid: `${p.id}-A-${Math.random().toString(36).substring(2, 7)}`,
         pairId: p.id,
@@ -94,7 +80,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
         imageUrl: p.cardAImageUrl,
         partnerText: p.cardBText,
       });
-      // Side B = Blauw
       cards.push({
         uid: `${p.id}-B-${Math.random().toString(36).substring(2, 7)}`,
         pairId: p.id,
@@ -105,7 +90,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
       });
     });
 
-    // Shuffle cards across grid
     setAllCards(shuffleArray(cards));
     setConnectedPairs([]);
     setSelectedCardUid(null);
@@ -113,16 +97,13 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     setDragOverCardUid(null);
     setGameResult(null);
     setTimerSeconds(0);
-    justDraggedRef.current = false;
-    isDraggingRef.current = false;
-    dragStartPosRef.current = null;
+    pointerStateRef.current = null;
   };
 
   useEffect(() => {
     initGame();
   }, [cardSet]);
 
-  // Lookup map of which card is paired
   const cardPairMap = useMemo(() => {
     const map = new Map<string, { pair: ConnectedPair; partner: PlayableCard }>();
     connectedPairs.forEach((cp) => {
@@ -136,19 +117,14 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
   const isFullyConnected =
     totalTargetPairs > 0 && connectedPairs.length === totalTargetPairs;
 
-  // Handler to pair two cards — uses functional state check to prevent
-  // double-pairing from race conditions (drag+click firing simultaneously).
   const pairCards = (card1: PlayableCard, card2: PlayableCard) => {
     if (card1.uid === card2.uid) return;
-
-    // Both cards must be of different sides (1 Green, 1 Blue)
     if (card1.side === card2.side) {
       showNotice("Koppel altijd een groen kaartje aan een blauw kaartje!");
       return;
     }
 
     setConnectedPairs((prev) => {
-      // Re-check against the latest state to prevent double-pairing
       const isAlreadyPaired = prev.some(
         (cp) =>
           cp.card1.uid === card1.uid ||
@@ -170,30 +146,27 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     setDragOverCardUid(null);
   };
 
-  // Click handler — ignores clicks that are actually the tail end of a drag
-  const handleCardClick = (card: PlayableCard) => {
-    // Suppress the phantom click that browsers fire right after a drag ends
-    if (justDraggedRef.current) {
-      justDraggedRef.current = false;
-      return;
-    }
+  const unpairCard = (card: PlayableCard) => {
+    const existing = cardPairMap.get(card.uid);
+    if (!existing) return;
+    setConnectedPairs((prev) => prev.filter((p) => p.id !== existing.pair.id));
+    setSelectedCardUid(null);
+    showNotice("Kaartenpaar ontkoppeld.");
+  };
 
-    // If clicking an already paired (gray) card, uncouple it
+  // ── Click handler (only fires when pointer did NOT move beyond threshold) ──
+  const handleCardClick = (card: PlayableCard) => {
     const existing = cardPairMap.get(card.uid);
     if (existing) {
-      setConnectedPairs((prev) => prev.filter((p) => p.id !== existing.pair.id));
-      setSelectedCardUid(null);
-      showNotice("Kaartenpaar ontkoppeld.");
+      unpairCard(card);
       return;
     }
 
-    // If nothing selected yet, select this card
     if (!selectedCardUid) {
       setSelectedCardUid(card.uid);
       return;
     }
 
-    // Deselect if clicking the same card
     if (selectedCardUid === card.uid) {
       setSelectedCardUid(null);
       return;
@@ -205,7 +178,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
       return;
     }
 
-    // If clicked two cards of the same color, switch selection smoothly
     if (firstCard.side === card.side) {
       setSelectedCardUid(card.uid);
       showNotice(
@@ -216,67 +188,154 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
       return;
     }
 
-    // Pair Green + Blue!
     pairCards(firstCard, card);
   };
 
-  // Drag & Drop handlers
-  const handleDragStart = (e: DragEvent, card: PlayableCard) => {
-    if (cardPairMap.has(card.uid)) {
-      e.preventDefault();
+  // ── Pointer-based drag (replaces HTML5 drag-and-drop) ──
+  const handlePointerDown = (e: ReactPointerEvent, card: PlayableCard) => {
+    if (cardPairMap.has(card.uid)) return;
+    pointerStateRef.current = {
+      card,
+      startX: e.clientX,
+      startY: e.clientY,
+      moved: false,
+    };
+  };
+
+  const handlePointerMove = (e: ReactPointerEvent) => {
+    const ps = pointerStateRef.current;
+    if (!ps || ps.moved) {
+      if (ps && ps.moved) {
+        updateDragOverCard(e.clientX, e.clientY);
+      }
       return;
     }
-    isDraggingRef.current = true;
-    dragStartPosRef.current = { x: e.clientX, y: e.clientY };
-    setDraggedCardUid(card.uid);
-    e.dataTransfer.setData("text/plain", card.uid);
-    e.dataTransfer.effectAllowed = "move";
+
+    const dx = e.clientX - ps.startX;
+    const dy = e.clientY - ps.startY;
+    if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+      ps.moved = true;
+      setDraggedCardUid(ps.card.uid);
+      setSelectedCardUid(null);
+    }
   };
 
-  const handleDragOver = (e: DragEvent, targetCard: PlayableCard) => {
-    e.preventDefault();
-    if (!draggedCardUid || draggedCardUid === targetCard.uid) return;
-    if (cardPairMap.has(targetCard.uid)) return;
-    setDragOverCardUid(targetCard.uid);
-    e.dataTransfer.dropEffect = "move";
+  const updateDragOverCard = (clientX: number, clientY: number) => {
+    const el = document.elementFromPoint(clientX, clientY);
+    if (!el) {
+      setDragOverCardUid(null);
+      return;
+    }
+    const cardEl = el.closest("[data-card-uid]");
+    if (cardEl) {
+      const uid = cardEl.getAttribute("data-card-uid");
+      const ps = pointerStateRef.current;
+      if (uid && uid !== ps?.card.uid && !cardPairMap.has(uid)) {
+        setDragOverCardUid(uid);
+      } else {
+        setDragOverCardUid(null);
+      }
+    } else {
+      setDragOverCardUid(null);
+    }
   };
 
-  const handleDragLeave = () => {
-    setDragOverCardUid(null);
-  };
+  const handlePointerUp = (e: ReactPointerEvent) => {
+    const ps = pointerStateRef.current;
+    if (!ps) return;
 
-  const handleDrop = (e: DragEvent, targetCard: PlayableCard) => {
-    e.preventDefault();
-    setDragOverCardUid(null);
-    const sourceUid = e.dataTransfer.getData("text/plain") || draggedCardUid;
-    if (!sourceUid || sourceUid === targetCard.uid) {
+    if (ps.moved) {
+      // It was a drag — find the card under the pointer
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (el) {
+        const cardEl = el.closest("[data-card-uid]");
+        if (cardEl) {
+          const targetUid = cardEl.getAttribute("data-card-uid");
+          if (targetUid && targetUid !== ps.card.uid && !cardPairMap.has(targetUid)) {
+            const targetCard = allCards.find((c) => c.uid === targetUid);
+            if (targetCard) {
+              pairCards(ps.card, targetCard);
+            }
+          }
+        }
+      }
       setDraggedCardUid(null);
-      return;
+      setDragOverCardUid(null);
+    } else {
+      // It was a click (pointer didn't move beyond threshold)
+      handleCardClick(ps.card);
     }
 
-    const sourceCard = allCards.find((c) => c.uid === sourceUid);
-    if (
-      sourceCard &&
-      !cardPairMap.has(sourceCard.uid) &&
-      !cardPairMap.has(targetCard.uid)
-    ) {
-      pairCards(sourceCard, targetCard);
-    }
-    isDraggingRef.current = false;
-    justDraggedRef.current = true;
-    setDraggedCardUid(null);
+    pointerStateRef.current = null;
   };
 
-  const handleDragEnd = () => {
-    if (isDraggingRef.current) {
-      justDraggedRef.current = true;
-    }
-    isDraggingRef.current = false;
+  const handlePointerCancel = () => {
+    pointerStateRef.current = null;
     setDraggedCardUid(null);
     setDragOverCardUid(null);
   };
 
-  // Undo last step handler
+  // Global pointermove listener so dragging works even when pointer leaves the card
+  useEffect(() => {
+    const onMove = (e: globalThis.PointerEvent) => {
+      const ps = pointerStateRef.current;
+      if (!ps) return;
+      if (ps.moved) {
+        updateDragOverCard(e.clientX, e.clientY);
+      } else {
+        const dx = e.clientX - ps.startX;
+        const dy = e.clientY - ps.startY;
+        if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+          ps.moved = true;
+          setDraggedCardUid(ps.card.uid);
+          setSelectedCardUid(null);
+        }
+      }
+    };
+
+    const onUp = (e: globalThis.PointerEvent) => {
+      const ps = pointerStateRef.current;
+      if (!ps) return;
+
+      if (ps.moved) {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        if (el) {
+          const cardEl = el.closest("[data-card-uid]");
+          if (cardEl) {
+            const targetUid = cardEl.getAttribute("data-card-uid");
+            if (targetUid && targetUid !== ps.card.uid && !cardPairMap.has(targetUid)) {
+              const targetCard = allCards.find((c) => c.uid === targetUid);
+              if (targetCard) {
+                pairCards(ps.card, targetCard);
+              }
+            }
+          }
+        }
+        setDraggedCardUid(null);
+        setDragOverCardUid(null);
+      } else {
+        handleCardClick(ps.card);
+      }
+
+      pointerStateRef.current = null;
+    };
+
+    const onCancel = () => {
+      pointerStateRef.current = null;
+      setDraggedCardUid(null);
+      setDragOverCardUid(null);
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onCancel);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onCancel);
+    };
+  }, [allCards, cardPairMap]);
+
   const handleUndoLast = () => {
     if (connectedPairs.length === 0) return;
     setConnectedPairs((prev) => prev.slice(0, prev.length - 1));
@@ -284,25 +343,20 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     showNotice("Laatste koppeling ongedaan gemaakt.");
   };
 
-  // Confirm restart
   const handleConfirmRestart = () => {
     setShowRestartConfirm(false);
     initGame();
   };
 
-  // Check answers
   const handleCheckAnswers = () => {
     if (!isFullyConnected) return;
 
     const evaluationItems = connectedPairs.map((cp) => {
-      // Correct if card1 and card2 share the exact same pairId and have opposite sides
       const isCorrect =
         cp.card1.pairId === cp.card2.pairId && cp.card1.side !== cp.card2.side;
-
       const originalPair = cardSet.pairs?.find(
         (p) => p.id === cp.card1.pairId || p.id === cp.card2.pairId
       );
-
       return {
         id: cp.id,
         card1: cp.card1,
@@ -338,29 +392,17 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     };
 
     setGameResult(result);
-
-    if (passed) {
-      fireSuccessConfetti();
-    }
+    if (passed) fireSuccessConfetti();
   };
 
-  // Compute grid columns and rows to mathematically fit the screen without scroll
   const gridConfig = useMemo(() => {
     const count = allCards.length;
-    if (count <= 12) {
-      return isWideScreen ? { cols: 4, rows: 3 } : { cols: 3, rows: 4 };
-    }
-    if (count <= 16) {
-      return { cols: 4, rows: 4 };
-    }
-    if (count <= 20) {
-      return isWideScreen ? { cols: 5, rows: 4 } : { cols: 4, rows: 5 };
-    }
-    // Default for 24 cards (6 columns x 4 rows in landscape, 4 cols x 6 rows in portrait)
+    if (count <= 12) return isWideScreen ? { cols: 4, rows: 3 } : { cols: 3, rows: 4 };
+    if (count <= 16) return { cols: 4, rows: 4 };
+    if (count <= 20) return isWideScreen ? { cols: 5, rows: 4 } : { cols: 4, rows: 5 };
     return isWideScreen ? { cols: 6, rows: 4 } : { cols: 4, rows: 6 };
   }, [allCards.length, isWideScreen]);
 
-  // Find currently selected card object
   const selectedCard = selectedCardUid
     ? allCards.find((c) => c.uid === selectedCardUid)
     : null;
@@ -369,33 +411,25 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
     <div
       id="game-viewport-container"
       className="h-full w-full max-h-screen overflow-hidden flex flex-col justify-between bg-[#EEF2F7] p-2 sm:p-3 select-none"
+      style={{ touchAction: "none" }}
     >
-      {/* COMPACT TOP HEADER BAR */}
       <header className="shrink-0 bg-white rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 border border-slate-200 shadow-2xs mb-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* Left: Navigation and Title (only title, no description) */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div>
-              <h1 className="font-black text-[#002B49] text-sm sm:text-base tracking-tight leading-tight">
-                {cardSet.title}
-              </h1>
-            </div>
+            <h1 className="font-black text-[#002B49] text-sm sm:text-base tracking-tight leading-tight">
+              {cardSet.title}
+            </h1>
           </div>
 
-          {/* Center: Live Stats Badges & Info Button */}
           <div className="flex items-center gap-2">
-            {/* Pairs count */}
             <div
               id="stat-gekoppeld"
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 border border-blue-200/80 text-[#0066B3] text-xs font-black shadow-2xs"
             >
               <Link2 className="w-3.5 h-3.5 text-[#0066B3]" />
-              <span>
-                Gekoppeld: {connectedPairs.length}/{totalTargetPairs}
-              </span>
+              <span>Gekoppeld: {connectedPairs.length}/{totalTargetPairs}</span>
             </div>
 
-            {/* Timer */}
             <div
               id="stat-timer"
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-black shadow-2xs font-mono"
@@ -404,7 +438,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
               <span>Tijd: {formatTimer(timerSeconds)}</span>
             </div>
 
-            {/* Uitleg modal button */}
             <button
               id="btn-open-intro-instructions"
               onClick={() => setShowIntroModal(true)}
@@ -416,9 +449,7 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
             </button>
           </div>
 
-          {/* Right: Action Buttons (Undo, Restart, Nakijken) */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Laatste stap ongedaan maken */}
             <button
               id="btn-undo-step"
               onClick={handleUndoLast}
@@ -435,7 +466,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
               <span className="md:hidden">Herstel</span>
             </button>
 
-            {/* Opnieuw beginnen */}
             <button
               id="btn-restart-game"
               onClick={() => setShowRestartConfirm(true)}
@@ -447,7 +477,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
               <span className="md:hidden">Reset</span>
             </button>
 
-            {/* Nakijken Button */}
             <button
               id="btn-nakijken"
               onClick={handleCheckAnswers}
@@ -473,7 +502,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
           </div>
         </div>
 
-        {/* Dynamic Instructional Banner */}
         <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-2">
             <span className="flex items-center">
@@ -481,7 +509,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
               <span className="w-3 h-3 rounded-full bg-[#2563eb] border-2 border-white shadow-xs -ml-1"></span>
             </span>
 
-            {/* Dynamic Instruction text depending on selected card */}
             {selectedCard ? (
               <span className="font-semibold text-[#002B49] animate-pulse">
                 {selectedCard.side === "A" ? (
@@ -504,7 +531,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
             )}
           </div>
 
-          {/* Feedback notice or helpful tip */}
           <div className="text-[11px] font-semibold text-slate-500 truncate max-w-xs sm:max-w-md">
             {feedbackNotice ? (
               <span className="text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
@@ -521,7 +547,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
         </div>
       </header>
 
-      {/* FULL-SCREEN CARD GRID (Fits 100% within viewport height, zero vertical scroll) */}
       <main className="flex-1 min-h-0 w-full overflow-hidden flex items-center justify-center p-0.5">
         <div
           id="cards-grid"
@@ -536,10 +561,9 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
             const isPaired = Boolean(pairData);
             const isSelected = selectedCardUid === card.uid;
             const isDragOver = dragOverCardUid === card.uid;
+            const isDragging = draggedCardUid === card.uid;
             const isGreenSide = card.side === "A";
 
-            // If card is paired: become GRAY!
-            // Stacked visual showing only the concepts on gray cards
             if (isPaired && pairData) {
               const topCard = card;
               const bottomCard = pairData.partner;
@@ -548,18 +572,20 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
                 <div
                   key={card.uid}
                   id={`card-slot-${index}`}
-                  onClick={() => handleCardClick(card)}
+                  data-card-uid={card.uid}
+                  onPointerDown={(e) => handlePointerDown(e, card)}
+                  onPointerUp={(e) => handlePointerUp(e)}
+                  onPointerCancel={handlePointerCancel}
                   title="Gekoppeld paar (grijs) • Klik om te ontkoppelen"
                   className="relative w-full h-full p-0.5 sm:p-1 cursor-pointer group select-none"
+                  style={{ touchAction: "none" }}
                 >
-                  {/* UNDERNEATH GRAY CARD (Tilted -3° with shadow) */}
                   <div className="absolute inset-x-1 inset-y-1 sm:inset-x-1.5 sm:inset-y-1.5 rounded-2xl p-2 sm:p-2.5 flex items-center justify-center text-center shadow-md border-2 bg-slate-500 border-slate-600 text-slate-200 transform -rotate-3 -translate-x-1 -translate-y-0.5 transition-transform group-hover:-rotate-4 group-hover:-translate-x-1.5">
                     <p className="font-medium text-[10px] sm:text-xs md:text-sm leading-snug line-clamp-3 text-slate-200 opacity-90">
                       {bottomCard.text}
                     </p>
                   </div>
 
-                  {/* TOP GRAY CARD (Tilted +2°, overlapping on top, only the concept) */}
                   <div className="relative w-full h-full rounded-2xl p-2 sm:p-3 flex items-center justify-center text-center shadow-lg border-2 bg-slate-400 border-slate-300 text-white transform rotate-2 translate-x-0.5 translate-y-0.5 opacity-95 group-hover:opacity-100 group-hover:rotate-1 group-hover:scale-[1.01] transition-all">
                     <p className="font-semibold text-white text-[10px] sm:text-xs md:text-sm lg:text-base leading-snug line-clamp-4">
                       {topCard.text}
@@ -569,19 +595,14 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
               );
             }
 
-            // UNPAIRED CARD: Clean solid card with ONLY the concept text!
-            // Green (#059669) or Blue (#2563eb)
             return (
               <div
                 key={card.uid}
                 id={`card-slot-${index}`}
-                draggable={!isPaired}
-                onDragStart={(e) => handleDragStart(e, card)}
-                onDragOver={(e) => handleDragOver(e, card)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, card)}
-                onDragEnd={handleDragEnd}
-                onClick={() => handleCardClick(card)}
+                data-card-uid={card.uid}
+                onPointerDown={(e) => handlePointerDown(e, card)}
+                onPointerUp={(e) => handlePointerUp(e)}
+                onPointerCancel={handlePointerCancel}
                 className={`relative w-full h-full rounded-2xl p-2 sm:p-3.5 flex items-center justify-center text-center transition-all duration-150 cursor-pointer shadow-md select-none ${
                   isGreenSide
                     ? "bg-[#059669] hover:bg-[#047857] text-white border-2 border-emerald-400/50"
@@ -594,9 +615,11 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
                   isDragOver
                     ? "ring-4 ring-white scale-[1.04] shadow-2xl z-20"
                     : ""
+                } ${
+                  isDragging ? "opacity-50 scale-95 z-30" : ""
                 }`}
+                style={{ touchAction: "none" }}
               >
-                {/* ONLY the concept text on the card */}
                 <p className="font-semibold text-white text-[10px] sm:text-xs md:text-sm lg:text-base leading-snug line-clamp-4 px-1">
                   {card.text}
                 </p>
@@ -606,11 +629,9 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
         </div>
       </main>
 
-      {/* POPUP MET UITLEG IN HET BEGIN */}
       {showIntroModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 relative">
-            {/* Close icon top right */}
             <button
               onClick={() => setShowIntroModal(false)}
               className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -619,7 +640,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Summa Icon Header */}
             <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#0066B3] flex items-center justify-center mx-auto mb-4 border border-blue-100">
               <Layers className="w-6 h-6" />
             </div>
@@ -631,7 +651,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
               Zoek de begrippen die bij elkaar horen
             </p>
 
-            {/* Instructions list */}
             <div className="space-y-3.5 mb-7 text-left text-sm text-slate-700">
               <div className="flex items-start gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <div className="flex shrink-0 items-center mt-0.5">
@@ -683,7 +702,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
               </div>
             </div>
 
-            {/* Start button */}
             <button
               id="btn-start-game-intro"
               onClick={() => setShowIntroModal(false)}
@@ -695,7 +713,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
         </div>
       )}
 
-      {/* Restart Confirmation Modal */}
       {showRestartConfirm && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95">
@@ -706,7 +723,7 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
               Opnieuw beginnen?
             </h3>
             <p className="text-slate-600 text-center text-sm mb-6 leading-relaxed">
-              “Weet je zeker dat je opnieuw wilt beginnen? Je gemaakte koppelingen en verstreken tijd gaan verloren.”
+              "Weet je zeker dat je opnieuw wilt beginnen? Je gemaakte koppelingen en verstreken tijd gaan verloren."
             </p>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -728,7 +745,6 @@ export const GameView: FC<GameViewProps> = ({ cardSet, onBackToHome }) => {
         </div>
       )}
 
-      {/* Results Modal */}
       {gameResult && (
         <ResultsModal
           result={gameResult}
